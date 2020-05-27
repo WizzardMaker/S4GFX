@@ -21,14 +21,14 @@ namespace S4GFX.FileReader
 					continue;
 
 				if(offsetTable[i] > offset) {
-					Console.WriteLine($"DIL {gilIndex} --> {lastGood}");
+					//Console.WriteLine($"DIL {gilIndex} --> {lastGood}");
 					return lastGood;
 				}
 
 				lastGood = i;
 			}
 
-			Console.WriteLine($"Unable to find offset gilIndex: {gilIndex}");
+			//Console.WriteLine($"Unable to find offset gilIndex: {gilIndex}");
 			return lastGood;
 		}
 
@@ -36,7 +36,7 @@ namespace S4GFX.FileReader
 			ReadResource(reader);
 
 			int imageCount = GetImageCount(reader);
-			Console.WriteLine($"Image count: {imageCount}");
+			//Console.WriteLine($"Image count: {imageCount}");
 
 			offsetTable = new Int32[imageCount];
 

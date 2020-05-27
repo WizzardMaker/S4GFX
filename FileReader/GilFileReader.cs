@@ -16,12 +16,18 @@ namespace S4GFX.FileReader
 			return offsetTable != null ? offsetTable.Length : 0;
 		}
 
-		public Int32 GetImagOffset(int index) {
+		public Int32 GetImageOffset(int index) {
 			if ((index < 0) || (index >= offsetTable.Length)) {
 				return -1;
 			}
 
 			return offsetTable[index];
+		}
+
+		public void AddOffsetToFollowing(int startIndex, int offsetToAdd) {
+			for(int i = startIndex; i < offsetTable.Length; i++) {
+				offsetTable[i] += offsetToAdd;
+			}
 		}
 
 		public GilFileReader(BinaryReader resourceReader) {
@@ -33,6 +39,14 @@ namespace S4GFX.FileReader
 
 			for(int i = 0; i < imageCount; i++) {
 				offsetTable[i] = resourceReader.ReadInt32();
+			}
+		}
+
+		public void WriteToFile(BinaryWriter writer) {
+			writer.Seek(HeaderSize, SeekOrigin.Begin);
+
+			for (int i = 0; i < offsetTable.Length; i++) {
+				writer.Write((Int32)offsetTable[i]);
 			}
 		}
 	}

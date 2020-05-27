@@ -25,17 +25,40 @@ namespace S4GFX.FileReader
 			return images[index];
 		}
 
+		public void ResizeImage(int index, int width, int height) {
+			GfxImage image = images[index];
+
+			int oldSize = image.Width * image.Height * 4;
+			int offsetToAdd = width * height * 4 - oldSize;
+
+			offsetTable.AddOffsetToFollowing(index+1, offsetToAdd);
+		}
+
+		GilFileReader offsetTable;
+		JilFileReader jobIndexList;
+		DilFileReader directionIndexList;
+		PaletteCollection paletteCollection;
 		public GfxFileReader(BinaryReader reader,
 			GilFileReader offsetTable, JilFileReader jobIndexList, DilFileReader directionIndexList, PaletteCollection paletteCollection)  {
 
+			this.offsetTable = offsetTable;
+			this.jobIndexList = jobIndexList;
+			this.directionIndexList = directionIndexList;
+			this.paletteCollection = paletteCollection;
+
 			ReadResource(reader);
+
+			reader.BaseStream.Seek(0, SeekOrigin.Begin);
+			Byte[] buffer = reader.ReadBytes((int)reader.BaseStream.Length);
+
+			reader.BaseStream.Seek(HeaderSize, SeekOrigin.Begin);
 
 			int count = offsetTable.GetImageCount();
 			images = new GfxImage[count];
 
 			int lastGood = 0;
 			for(int i = 0; i < count; i++) {
-				int gfxOffset = offsetTable.GetImagOffset(i);
+				int gfxOffset = offsetTable.GetImageOffset(i);
 
 				int jobIndex = i;
 
@@ -47,20 +70,21 @@ namespace S4GFX.FileReader
 					lastGood = jobIndex;
 				}
 
-				Console.WriteLine($"JIL Offset: {jobIndex} in image {i}");
+				//Console.WriteLine($"JIL Offset: {jobIndex} in image {i}");
 
-				images[i] = ReadImage(reader, gfxOffset, paletteCollection.GetPalette(), paletteCollection.GetOffset(jobIndex));
+				images[i] = ReadImage(reader, gfxOffset, paletteCollection.GetPalette(), paletteCollection.GetOffset(jobIndex), buffer);
 			}
 		}
 
-		GfxImage ReadImage(BinaryReader reader, int offset, Palette palette, int paletteOffset) {
+		GfxImage ReadImage(BinaryReader reader, int offset, Palette palette, int paletteOffset, Byte[] buffer) {
 			reader.BaseStream.Seek(offset, SeekOrigin.Begin);
 
-			int imgHeadType = reader.ReadInt16();
+			int imgHeadType = (UInt16)reader.ReadInt16();
+
+			GfxImage newImg = new GfxImage(buffer, palette, paletteOffset);
 
 			reader.BaseStream.Seek(offset, SeekOrigin.Begin);
 
-			GfxImage newImg = new GfxImage(reader, palette, paletteOffset);
 
 			if(imgHeadType > 860) {
 				isWordHeader = true;

@@ -14,55 +14,112 @@ namespace S4GFX
 	{
 		static GfxFileReader gfxFile;
 
+		static bool removeAlpha, removeShadows;
+
 		static void Main(string[] args) {
 			Console.WriteLine("Export all: (1), Export one group: (2), Export one individual: (3)");
-			char choice = Console.ReadKey().KeyChar;
+			string choice = Console.ReadLine();
 
 			switch (choice) {
-				case '1':
-					for (int i = 0; i < 45; i++) {
-						Load("GFX/" + i);
-						SaveBitmaps("GFX/" + i);
-					}
+				case "1":
+					AskRemoveShadowsAndAlpha();
+
+				//Parallel.For(0, 45, (i) => {
+				//	var gfx = Load("GFX/" + i);
+				//	if (gfx == null)
+				//		return;
+
+				//	SaveAllBitmaps("GFX/" + i, gfx);
+				//});
+				for (int i = 0; i < 45; i++) {
+					Load("GFX/" + i);
+					SaveAllBitmaps("GFX/" + i);
+				}
 				break;
 
 				default:
-				case '2':
+				case "2": { 
 					REPEAT:
 					Console.WriteLine("What group:");
 					string choiceGroup = Console.ReadLine();
 
 					string path = "GFX/" + choiceGroup;
 					if (!File.Exists(path + ".gfx")) {
-							Console.WriteLine($"Group {choiceGroup + ".gfx"} does not exist!");
+							Console.WriteLine($"Group {path} does not exist!");
 							goto REPEAT;
-						}
+					}
 
+					AskRemoveShadowsAndAlpha();
 					Load(path);
-					SaveBitmaps(path);
+					SaveAllBitmaps(path);
+				}
+				break;
+
+				case "3": {
+					REPEAT_SINGLE_GROUP:
+					Console.WriteLine("What group:");
+					string choiceGroup = Console.ReadLine();
+
+					string path = "GFX/" + choiceGroup;
+					if (!File.Exists(path + ".gfx")) {
+						Console.WriteLine($"Group {path} does not exist!");
+						goto REPEAT_SINGLE_GROUP;
+					}
+					Load(path);
+
+					REPEAT_SINGLE_IMAGE:
+					Console.WriteLine($"What image?: {gfxFile.GetImageCount()} images");
+					string choiceImage = Console.ReadLine();
+
+					int image = int.Parse(choiceImage);
+					if (image > gfxFile.GetImageCount()) {
+						Console.WriteLine($"There is no image nr. {image}!");
+						goto REPEAT_SINGLE_IMAGE;
+					}
+
+					AskRemoveShadowsAndAlpha();
+					SaveToBitmap(path, image, gfxFile);
+				}
 				break;
 			}
 
-
-			Console.ReadKey();
+			gfxFile = null;
+			GC.Collect();
+			//Console.ReadKey();
 		}
 
-		static public void Load(string fileId) {
+		public static void AskRemoveShadowsAndAlpha() {
+			Console.WriteLine("Remove nothing (1), only Alpha (2), Shadows (3) or both (4)?");
+			string choice = Console.ReadLine();
+			switch (choice) {
+				case "2":
+				removeAlpha = true;
+				break;
+				case "3":
+				removeShadows = true;
+				break;
+				case "4":
+				removeAlpha = removeShadows = true;
+				break;
+			}
+		}
+
+		static public GfxFileReader Load(string fileId) {
 
 			bool gfx = File.Exists(fileId + ".gfx");
 			if(gfx == false) {
-				return;
+				return null;
 			}
 
 			bool pil = File.Exists(fileId + ".pil");
 			bool jil = File.Exists(fileId + ".jil");
 
 
-			DoLoad(fileId, pil, jil);
+			return DoLoad(fileId, pil, jil);
 		}
 
-		static public void DoLoad(string fileId, bool usePli, bool useJil) {
-			Console.WriteLine($"Using .jil={useJil}");
+		static public GfxFileReader DoLoad(string fileId, bool usePli, bool useJil) {
+			//Console.WriteLine($"Using .jil={useJil}");
 
 			var gfx = new BinaryReader(File.Open(fileId + ".gfx", FileMode.Open));
 			var gil = new BinaryReader(File.Open(fileId + ".gil", FileMode.Open));
@@ -97,28 +154,58 @@ namespace S4GFX
 			}
 
 			gfxFile = new GfxFileReader(gfx, gfxIndexList, jobIndexList, directionIndexList, paletteCollection);
-
+			return gfxFile;
 		}
 
-		static void SaveBitmaps(string path) {
-			for(int i = 0; i < gfxFile.GetImageCount(); i++) {
-				GfxImage image = gfxFile.GetImage(i);
-				int width = image.Width;
-				int height = image.Height;
-				using (DirectBitmap b = new DirectBitmap(image.Width, image.Height)) {
-					ImageData data = image.GetImageData();
+		static void SaveAllBitmaps(string path, GfxFileReader file = null) {
+			Console.WriteLine($"Start saving: " + path);
+			//Parallel.For(0, gfxFile.GetImageCount(), (i) => { SaveToBitmap(path, i); });
+			file = file ?? gfxFile;
 
-					int index = 0;
-					for (int y = 0; y < height; y++) {
-						for (int x = 0; x < width; x++) {
-							b.SetPixel(x, y, Color.FromArgb(data.data[index + 0] == 255 && data.data[index + 1] + data.data[index + 2] == 0 ? 0 : 255, data.data[index + 0], data.data[index + 1], data.data[index + 2]));
-							index += 4;
-						}
-					}
-					Directory.CreateDirectory(path);
-					b.Bitmap.Save($"{path}/{i}.png", System.Drawing.Imaging.ImageFormat.Png);
-					Console.WriteLine($"Saved {path}/{i}");
+			for (int i = 0; i < file.GetImageCount(); i++) {
+				try {
+					SaveToBitmap(path, i, file);
+				}catch(Exception e) {
+					Console.WriteLine(e.Message);
+					Console.WriteLine(e.StackTrace);
 				}
+			}
+
+			Console.WriteLine($"Saved: " + path);
+		}
+
+		private static void SaveToBitmap(string path, int i, GfxFileReader file) {
+			GfxImage image = file.GetImage(i);
+			int width = image.Width;
+			int height = image.Height;
+			using (DirectBitmap b = new DirectBitmap(image.Width, image.Height)) {
+				ImageData data = image.GetImageData();
+
+				int index = 0;
+				for (int y = 0; y < height; y++) {
+					for (int x = 0; x < width; x++) {
+						int alpha = 255;
+						byte red = data.data[index + 0];
+						byte green = data.data[index + 1];
+						byte blue = data.data[index + 2];
+
+						if (red == 255 && green + blue == 0) {
+							alpha = removeAlpha ? 0 : alpha;
+						}
+						if (green == 255 && red + blue == 0) {
+							alpha = removeShadows ? 0 : alpha;
+						}
+
+						b.SetPixel(x, y, Color.FromArgb(alpha, red, green, blue));
+
+						index += 4;
+					}
+				}
+
+				Directory.CreateDirectory(path);
+				b.Bitmap.Save($"{path}/{i}.png", System.Drawing.Imaging.ImageFormat.Png);
+				//if( i % 50 == 0)
+					//Console.WriteLine($"Saved {i}/{gfxFile.GetImageCount()}");
 			}
 		}
 	}

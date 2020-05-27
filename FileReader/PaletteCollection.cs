@@ -6,10 +6,8 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace S4GFX.FileReader
-{
-	class PaletteCollection : FileReaderBase
-	{
+namespace S4GFX.FileReader{
+	class PaletteCollection : FileReaderBase {
 		Palette palette;
 		PilFileReader pilFile;
 		int paletteFileOffset;
@@ -22,12 +20,10 @@ namespace S4GFX.FileReader
 			return (pilFile.GetOffset(gfxImageIndex) - paletteFileOffset) / 2;
 		}
 
-		public PaletteCollection(BinaryReader pa6File , PilFileReader pilFile) {
-
+		public PaletteCollection(BinaryReader pa6File, PilFileReader pilFile) {
 			this.pilFile = pilFile;
 
 			ReadResource(pa6File);
-
 			paletteFileOffset = HeaderSize;
 
 			palette = new Palette(((int)pa6File.BaseStream.Length - HeaderSize) / 2);

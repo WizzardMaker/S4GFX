@@ -33,6 +33,7 @@ namespace S4GFX.FileReader
 			int count = offsetTable.GetImageCount();
 			images = new GfxImage[count];
 
+			int lastGood = 0;
 			for(int i = 0; i < count; i++) {
 				int gfxOffset = offsetTable.GetImagOffset(i);
 
@@ -40,8 +41,13 @@ namespace S4GFX.FileReader
 
 				if(directionIndexList != null) {
 					int dirOffset = directionIndexList.ReverseLookupOffset(i);
+
 					jobIndex = jobIndexList.ReverseLookupOffset(dirOffset);
+					jobIndex = jobIndex == -1 ? lastGood : jobIndex;
+					lastGood = jobIndex;
 				}
+
+				Console.WriteLine($"JIL Offset: {jobIndex} in image {i}");
 
 				images[i] = ReadImage(reader, gfxOffset, paletteCollection.GetPalette(), paletteCollection.GetOffset(jobIndex));
 			}

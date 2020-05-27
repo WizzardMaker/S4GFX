@@ -41,14 +41,14 @@ namespace S4GFX.GFX
 			int j = 0;
 
 			while(j < length) {
-				int value = buffer[pos];
+				int value = pos >= buffer.Length ? 0 : buffer[pos];
 				pos++;
 
 				UInt32 color;
 				int count = 1;
 
 				if(value <= 1) {
-					count = buffer[pos];
+					count = pos >= buffer.Length ? 01 : buffer[pos];
 					pos++;
 
 					if(value == 0) {
@@ -60,7 +60,7 @@ namespace S4GFX.GFX
 					color = palette.GetColor(paletteOffset + value);
 				}
 
-				for(int i = 0; (i<count)&& (j < length); i++) {
+				for(int i = 0; (i < count) && (j < length); i++) {
 					imgData[j++] = color;
 				}
 			}
@@ -84,7 +84,7 @@ namespace S4GFX.GFX
 
 			UInt32[] imgData = new UInt32[length];
 			data.BaseStream.Seek(0, SeekOrigin.Begin);
-			Byte[] buffer = data.ReadBytes(length);
+			Byte[] buffer = data.ReadBytes((int)data.BaseStream.Length);
 
 			if (imgType != 32) {
 				GetImageDataWithRunLengthEncoding(buffer, imgData, pos, length);

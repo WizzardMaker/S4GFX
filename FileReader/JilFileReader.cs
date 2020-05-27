@@ -12,7 +12,7 @@ namespace S4GFX.FileReader
 		Int32[] offsetTable;
 
 		public int ReverseLookupOffset(int dirOffset) {
-			int offset = dirOffset * 4*2 + HeaderSize;
+			int offset = dirOffset * 4 + HeaderSize;
 			
 			for (int i = 0; i < offsetTable.Length; i++) {
 				if (offsetTable[i] == offset) {
@@ -22,7 +22,7 @@ namespace S4GFX.FileReader
 			}
 
 			Console.WriteLine($"Unable to find offset dirOffset: {dirOffset}");
-			return 0;
+			return -1;
 		}
 
 		public JilFileReader(BinaryReader reader) {

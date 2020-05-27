@@ -52,6 +52,7 @@
     <Compile Include="FileReader\JilFileReader.cs" />
     <Compile Include="FileReader\PaletteCollection.cs" />
     <Compile Include="FileReader\PilFileReader.cs" />
+    <Compile Include="GFX\DirectBitmap.cs" />
     <Compile Include="GFX\GfxImage.cs" />
     <Compile Include="GFX\IGfxImage.cs" />
     <Compile Include="GFX\ImageData.cs" />

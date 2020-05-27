@@ -15,15 +15,48 @@ namespace S4GFX
 		static GfxFileReader gfxFile;
 
 		static void Main(string[] args) {
-			Load("GFX/14");
+			Console.WriteLine("Export all: (1), Export one group: (2), Export one individual: (3)");
+			char choice = Console.ReadKey().KeyChar;
 
-			SaveBitmap();
+			switch (choice) {
+				case '1':
+					for (int i = 0; i < 45; i++) {
+						Load("GFX/" + i);
+						SaveBitmaps("GFX/" + i);
+					}
+				break;
+
+				default:
+				case '2':
+					REPEAT:
+					Console.WriteLine("What group:");
+					string choiceGroup = Console.ReadLine();
+
+					string path = "GFX/" + choiceGroup;
+					if (!File.Exists(path + ".gfx")) {
+							Console.WriteLine($"Group {choiceGroup + ".gfx"} does not exist!");
+							goto REPEAT;
+						}
+
+					Load(path);
+					SaveBitmaps(path);
+				break;
+			}
+
+
 			Console.ReadKey();
 		}
 
 		static public void Load(string fileId) {
+
+			bool gfx = File.Exists(fileId + ".gfx");
+			if(gfx == false) {
+				return;
+			}
+
 			bool pil = File.Exists(fileId + ".pil");
 			bool jil = File.Exists(fileId + ".jil");
+
 
 			DoLoad(fileId, pil, jil);
 		}
@@ -64,23 +97,29 @@ namespace S4GFX
 			}
 
 			gfxFile = new GfxFileReader(gfx, gfxIndexList, jobIndexList, directionIndexList, paletteCollection);
+
 		}
 
-		static void SaveBitmap() {
-			GfxImage image = gfxFile.GetImage(3);
-			Bitmap b = new Bitmap(image.Width, image.Height);
-			
-			ImageData data = image.GetImageData();
+		static void SaveBitmaps(string path) {
+			for(int i = 0; i < gfxFile.GetImageCount(); i++) {
+				GfxImage image = gfxFile.GetImage(i);
+				int width = image.Width;
+				int height = image.Height;
+				using (DirectBitmap b = new DirectBitmap(image.Width, image.Height)) {
+					ImageData data = image.GetImageData();
 
-			int index = 0;
-			for (int y = 0; y < b.Height;y ++) {
-				for(int x = 0; x < b.Width; x++) {
-					b.SetPixel(x, y, Color.FromArgb(data.data[index + 0] == 255 && data.data[index + 1]+ data.data[index + 2] == 0 ? 0:255, data.data[index + 0], data.data[index + 1], data.data[index + 2]));
-					index += 4;
+					int index = 0;
+					for (int y = 0; y < height; y++) {
+						for (int x = 0; x < width; x++) {
+							b.SetPixel(x, y, Color.FromArgb(data.data[index + 0] == 255 && data.data[index + 1] + data.data[index + 2] == 0 ? 0 : 255, data.data[index + 0], data.data[index + 1], data.data[index + 2]));
+							index += 4;
+						}
+					}
+					Directory.CreateDirectory(path);
+					b.Bitmap.Save($"{path}/{i}.png", System.Drawing.Imaging.ImageFormat.Png);
+					Console.WriteLine($"Saved {path}/{i}");
 				}
 			}
-
-			b.Save("test.png",System.Drawing.Imaging.ImageFormat.Png);
 		}
 	}
 }

@@ -29,7 +29,7 @@ namespace S4GFX.FileReader
 			}
 
 			Console.WriteLine($"Unable to find offset gilIndex: {gilIndex}");
-			return 0;
+			return lastGood;
 		}
 
 		public DilFileReader(BinaryReader reader) {

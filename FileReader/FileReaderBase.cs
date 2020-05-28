@@ -46,5 +46,19 @@ namespace S4GFX.FileReader
 		override public string ToString() {
 			return $"Header: {magic}; {flag1}, {flag2}, {flag3}, {flag4},";
 		}
+
+		protected Byte[] GetHeaderData() {
+			Byte[] data = new Byte[(int)HeaderSize];
+
+			using (BinaryWriter writer = new BinaryWriter(new MemoryStream(data))) {
+				writer.Write(magic);
+				writer.Write(flag1);
+				writer.Write(flag2);
+				writer.Write(flag3);
+				writer.Write(flag4);
+			}
+
+			return data;
+		}
 	}
 }

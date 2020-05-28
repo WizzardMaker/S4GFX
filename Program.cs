@@ -17,9 +17,13 @@ namespace S4GFX
 		static bool removeAlpha, removeShadows;
 
 		static void Main(string[] args) {
-			Console.WriteLine("Place this exe in the Settler IV folder.");
-			Console.WriteLine("Images will be saved to the \"export\" folder.");
-			Console.WriteLine("Export all: (1), Export one group: (2), Export one individual: (3)");
+			Console.WriteLine("=Settler IV image exporter/importer=========================");
+			Console.WriteLine("Place this exe in the Settler IV folder!");
+			Console.WriteLine("Exported images will be saved to the \"export/gfx/%GROUP%/\" folder.");
+			Console.WriteLine("============================================================");
+			Console.WriteLine("");
+			Console.WriteLine("Export all: (1), Export one group: (2), Export one single image: (3), Import one single image (4)");
+			Console.WriteLine("");
 			string choice = Console.ReadLine();
 
 			switch (choice) {
@@ -42,7 +46,7 @@ namespace S4GFX
 				default:
 				case "2": { 
 					REPEAT:
-					Console.WriteLine("What group:");
+					Console.WriteLine("What group would you like to export the images from?");
 					string choiceGroup = Console.ReadLine();
 
 					string path = "GFX/" + choiceGroup;
@@ -59,7 +63,7 @@ namespace S4GFX
 
 				case "3": {
 					REPEAT_SINGLE_GROUP:
-					Console.WriteLine("What group:");
+					Console.WriteLine("What group would you like to export an image from?");
 					string choiceGroup = Console.ReadLine();
 
 					string path = "GFX/" + choiceGroup;
@@ -70,7 +74,7 @@ namespace S4GFX
 					Load(path);
 
 					REPEAT_SINGLE_IMAGE:
-					Console.WriteLine($"What image?: {gfxFile.GetImageCount()} images");
+					Console.WriteLine($"What number has the image you want to export? This group contains: {gfxFile.GetImageCount()} images");
 					string choiceImage = Console.ReadLine();
 
 					int image = int.Parse(choiceImage);
@@ -83,7 +87,55 @@ namespace S4GFX
 					SaveToBitmap(path, image, gfxFile);
 				}
 				break;
+				case "4": { //IMPORT
+					Console.WriteLine("=IMPORT=====================================================");
+					Console.WriteLine("To import files, save them to the export/gfx/%GROUP%/ folder.");
+					Console.WriteLine("The file has to be named after the image index that is to be replaced");
+					Console.WriteLine("To see what image has what index, export the group with (1-3) in the main menu.");
+					Console.WriteLine("Example would be: export/gfx/14/2.png -> replaces the woodcutter image of the trojan");
+					Console.WriteLine("");
+					Console.WriteLine("The finished gfx (and, but not neccesary, gil) file will be saved next to this programm.");
+					Console.WriteLine("Replace the original files in the gfx folder with the newly generated ones");
+					Console.WriteLine("============================================================");
+					Console.WriteLine("");
+					Console.WriteLine("Enter 0 to return to the main menu.");
+					Console.WriteLine("");
+
+					REPEAT_SINGLE_GROUP:
+					Console.WriteLine("What group would you like to import a file into?");
+					string choiceGroup = Console.ReadLine();
+
+					string path = "GFX/" + choiceGroup;
+					if (!File.Exists(path + ".gfx")) {
+						Console.WriteLine($"Group {path} does not exist!");
+						goto REPEAT_SINGLE_GROUP;
+					}
+					Load(path);
+
+					REPEAT_SINGLE_IMAGE:
+					Console.WriteLine($"What number has the image you want to import into the game files? This group contains: {gfxFile.GetImageCount()} images");
+					string choiceImage = Console.ReadLine();
+
+					int image = int.Parse(choiceImage);
+					if (image > gfxFile.GetImageCount()) {
+						Console.WriteLine($"There is no image nr. {image}!");
+						goto REPEAT_SINGLE_IMAGE;
+					}
+
+					//AskRemoveShadowsAndAlpha();
+					//SaveToBitmap(path, image, gfxFile);
+
+					ImageData data = LoadFromBitmap(path, image, gfxFile);
+					gfxFile.ChangeImageData(image, data);
+				}
+				break;
 			}
+
+			Console.WriteLine("");
+			Console.WriteLine("======");
+			Console.WriteLine("FINISHED LOADING");
+			Console.WriteLine("You may close this app now...");
+			Console.WriteLine("======");
 
 			gfxFile = null;
 			GC.Collect();
@@ -91,7 +143,16 @@ namespace S4GFX
 		}
 
 		public static void AskRemoveShadowsAndAlpha() {
-			Console.WriteLine("Remove nothing (1), only Alpha (2), Shadows (3) or both (4)?");
+			Console.WriteLine("===Mask Colors===");
+			Console.WriteLine("Settler IV images contain 2 separate masks.");
+			Console.WriteLine("A solid green color represents the shadow in-game");
+			Console.WriteLine("A solid red color represents the transparency");
+			Console.WriteLine("We can remove both colors in this step");
+			Console.WriteLine("=================");
+			Console.WriteLine("");
+			Console.WriteLine("Remove nothing (1), only transparency/Red (2), shadows/green (3) or both (4)?");
+			Console.WriteLine("");
+
 			string choice = Console.ReadLine();
 			switch (choice) {
 				case "2":
@@ -184,19 +245,33 @@ namespace S4GFX
 			Console.WriteLine($"Saved: " + path);
 		}
 
-		//private static GfxImage LoadFromBitmap(string path, int i, GfxFileReader file) {
-		//	GfxImage image = file.GetImage(i);
-		//	ImageData data = new ImageData(image.Height, image.Width);
+		private static ImageData LoadFromBitmap(string path, int i, GfxFileReader file) {
+			GfxImage image = file.GetImage(i);
 
-		//	Bitmap map = new Bitmap($"export/{path}/{i}.png");
+			Bitmap map = new Bitmap($"export/{path}/{i}.png");
 
-		//	for (int y = 0; y < image.Height; y++) {
-		//		for (int x = 0; x < image.Width; x++) {
-		//			Color c = map.GetPixel(x, y);
-					
-		//		}
-		//	}
-		//}
+			ImageData data = new ImageData(map.Height, map.Width);
+			image.Width = map.Width;
+			image.Height = map.Height;
+
+			data.data = new Byte[map.Height * map.Width * 4];
+
+			int index = 0;
+			for (int y = 0; y < map.Height; y++) {
+				for (int x = 0; x < map.Width; x++) {
+					Color c = map.GetPixel(x, y);
+
+					data.data[index + 0] = c.R;
+					data.data[index + 1] = c.G;
+					data.data[index + 2] = c.B;
+					data.data[index + 3] = 255;
+
+					index += 4;
+				}
+			}
+
+			return data;
+		}
 
 		private static void SaveToBitmap(string path, int i, GfxFileReader file) {
 			GfxImage image = file.GetImage(i);

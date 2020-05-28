@@ -24,6 +24,11 @@ namespace S4GFX.FileReader
 			return offsetTable[index];
 		}
 
+		/// <summary>
+		/// Moves all offsets by offsetToAdd, starting from index startIndex
+		/// </summary>
+		/// <param name="startIndex">the index to start from. INCLUDING</param>
+		/// <param name="offsetToAdd">the amount to add to the offset</param>
 		public void AddOffsetToFollowing(int startIndex, int offsetToAdd) {
 			for(int i = startIndex; i < offsetTable.Length; i++) {
 				offsetTable[i] += offsetToAdd;
@@ -42,12 +47,27 @@ namespace S4GFX.FileReader
 			}
 		}
 
-		public void WriteToFile(BinaryWriter writer) {
-			writer.Seek(HeaderSize, SeekOrigin.Begin);
 
-			for (int i = 0; i < offsetTable.Length; i++) {
-				writer.Write((Int32)offsetTable[i]);
+
+		public byte[] GetData() {
+			Byte[] data = new Byte[(int)baseStream.Length];
+
+			using (BinaryWriter writer = new BinaryWriter(new MemoryStream(data))) {
+				writer.Write(GetHeaderData());
+				//magic = startReader.ReadInt32();
+				//flag1 = startReader.ReadInt32();
+				//flag2 = startReader.ReadInt32();
+				//flag3 = startReader.ReadInt32();
+				//flag4 = startReader.ReadInt32();
+
+				writer.Seek(HeaderSize, SeekOrigin.Begin);
+
+				for (int i = 0; i < offsetTable.Length; i++) {
+					writer.Write((Int32)offsetTable[i]);
+				}
 			}
+
+			return data;
 		}
 	}
 }

@@ -70,6 +70,8 @@ namespace S4GFX.GFX
 					imgData[j++] = color;
 				}
 			}
+
+			//Console.WriteLine(count);
 		}
 
 		public void GetImageDataWithNoEncoding(Byte[] buffer, UInt32[] imgData, int pos, int length) {
@@ -82,19 +84,21 @@ namespace S4GFX.GFX
 			}
 		}
 
-		public int WriteImageDataToFile(ImageData newImage) {
+		public Byte[] CreateImageData(ImageData newImage) {
 			int length = Width * Height * 4;
 			int pos = DataOffset;
 
+			Byte[] data;
+
 			if (imgType != 32) {
-				GetImageDataWithRunLengthEncoding(newImage.data, pos, length);
+				data = CreateImageDataWithRunLengthEncoding(newImage.data, length);
 			} else {
-				WriteImageDataWithNoEncoding(newImage.data, pos, length);
+				data = WriteImageDataWithNoEncoding(newImage.data, pos, length);
 			}
-			return 1;
+			return data;
 		}
 
-		private void WriteImageDataWithNoEncoding(byte[] data, int pos, int length) {
+		private Byte[] WriteImageDataWithNoEncoding(byte[] data, int pos, int length) {
 			throw new NotImplementedException();
 		}
 
@@ -135,7 +139,7 @@ namespace S4GFX.GFX
 			return count;
 		}
 
-		private Byte[] GetImageDataWithRunLengthEncoding(byte[] data, int pos, int length) {
+		private Byte[] CreateImageDataWithRunLengthEncoding(byte[] data, int length) {
 			List<Byte> newData = new List<Byte>();
 
 			int dataLength = 0;
@@ -157,7 +161,7 @@ namespace S4GFX.GFX
 					valueIsOperator = true;
 				} else {
 					value = palette.GetIndex(paletteOffset, Palette.RGBToPalette(red, green, blue));
-					value = Math.Max((byte)2, ((byte)value));
+					value = Math.Max((byte)paletteOffset+2, ((byte)value));
 				}
 				int count = 1;
 
@@ -215,16 +219,14 @@ namespace S4GFX.GFX
 				GetImageDataWithNoEncoding(buffer, imgData, pos, length);
 			}
 			img.data = new Byte[length];
-
-
 			Buffer.BlockCopy(imgData, 0, img.data, 0, length);
 
-			byte[] test = GetImageDataWithRunLengthEncoding(img.data, pos, length);
-			Buffer.BlockCopy(test, 0, buffer, pos, test.Length);
+			//byte[] test = CreateImageDataWithRunLengthEncoding(img.data, length);
+			//Buffer.BlockCopy(test, 0, buffer, pos, test.Length);
 
-			GetImageDataWithRunLengthEncoding(buffer, imgData, pos, length);
+			//GetImageDataWithRunLengthEncoding(buffer, imgData, pos, length);
 
-			Buffer.BlockCopy(imgData, 0, img.data, 0, img.data.Length);
+			//Buffer.BlockCopy(imgData, 0, img.data, 0, img.data.Length);
 
 			return img;
 		}

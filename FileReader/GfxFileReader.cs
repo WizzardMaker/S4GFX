@@ -30,28 +30,53 @@ namespace S4GFX.FileReader
 			return images[index];
 		}
 
-		//public void ChangeImageData(int index, ImageData newData) {
-		//	BinaryReader reader = new BinaryReader(baseStream);
-		//	reader.BaseStream.Seek(0, SeekOrigin.Begin);
+		public void ChangeImageData(int index, ImageData newData) { 
+			//Read the old data
+			BinaryReader reader = new BinaryReader(baseStream);
+			reader.BaseStream.Seek(0, SeekOrigin.Begin);
+			Byte[] oldData = reader.ReadBytes((int)baseStream.Length);
 
-		//	GfxImage image = images[index];
+			//Get old image we want to change and create the corresponding new file data bytes from the new image
+			GfxImage image = images[index];
+			Byte[] imageDataToWrite = image.CreateImageData(newData); //The new bytes which are to be written to the gfx file
 
-		//	Byte[] oldData = reader.ReadBytes((int)baseStream.Length);
-		//	reader.Close();
+			int nextImageStartOffset = offsetTable.GetImageOffset(index + 1); //Get the current offset of the next image
+			int offset = Math.Max(0, ((images[index].DataOffset + imageDataToWrite.Length) - nextImageStartOffset)-1); //Our data could be larger, calculate how much larger
 
-		//	Byte[] newDataBuffer = new Byte[(int)baseStream.Length + offsetToAdd];
-		//	Buffer.BlockCopy(oldData, 0, newDataBuffer, 0, image.DataOffset);
+			Byte[] newDataBuffer = new Byte[(int)baseStream.Length + offset];//Our new data
+			Buffer.BlockCopy(oldData, 0, newDataBuffer, 0, image.DataOffset);//Fill it with the old data, up until our new image. We don't need to rewrite it, it still works
 
-		//	//write new data
+			//write new data
 
+			Buffer.BlockCopy(imageDataToWrite, 0, newDataBuffer, image.DataOffset, imageDataToWrite.Length); //Our new image gets written to the new gfx file
 
-		//	int offsetToAdd = newData.width * newData.height * 4 - oldSize;
+			if (offset != 0) { //We want to move all images that follow our changed image, if our new image is bigger
+				offsetTable.AddOffsetToFollowing(index + 1, offset);
 
-		//	offsetTable.AddOffsetToFollowing(index + 1, offsetToAdd);
+				File.WriteAllBytes("14TEST.gil", offsetTable.GetData()); //TODO! Change file name!
+			}
 
+			//Write new width and height
+			int newImageOffset = offsetTable.GetImageOffset(index);
+			if (image.headType) { //All sizes are 8Bit when true
+				newDataBuffer[newImageOffset] = (Byte)newData.width;//width
+				newDataBuffer[newImageOffset+1] = (Byte)newData.height;//height
+			} else { //16bit values
+				newDataBuffer[newImageOffset] = (Byte)newData.width; //width 1. Byte
+				newDataBuffer[newImageOffset + 1] = (Byte)(newData.width >> 8); //width 2. Byte
 
-		//	Buffer.BlockCopy(oldData, 0, newDataBuffer, 0, image.DataOffset);
-		//}
+				newDataBuffer[newImageOffset + 2] = (Byte)newData.height; //height 1. Byte
+				newDataBuffer[newImageOffset + 3] = (Byte)(newData.height >> 8); //height 2. Byte
+			}
+
+			//All files end with 0 and 1! This marks the end of the file
+			newDataBuffer[nextImageStartOffset+ offset - 1] = 0;
+			newDataBuffer[nextImageStartOffset+ offset - 2] = 1;
+
+			Buffer.BlockCopy(oldData, nextImageStartOffset - offset, newDataBuffer, offsetTable.GetImageOffset(index + 1), oldData.Length- nextImageStartOffset);
+
+			File.WriteAllBytes("14TEST.gfx", newDataBuffer); //TODO! Change file name!
+		}
 
 		//void ResizeImage(int index, int width, int height) {
 		//	GfxImage image = images[index];
@@ -113,6 +138,8 @@ namespace S4GFX.FileReader
 				images[i] = ReadImage(reader, gfxOffset, paletteCollection.GetPalette(), paletteCollection.GetOffset(jobIndex), buffer);
 				images[i].jobIndex = jobIndex;
 			}
+
+			//ChangeImageData(2, images[2].GetImageData());
 		}
 
 		//void WriteImage(BinaryWriter writer, int offset,)

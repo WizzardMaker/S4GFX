@@ -15,6 +15,8 @@ namespace S4GFX.FileReader
 		int flag3;
 		int flag4;
 
+		public Stream baseStream;
+
 		protected int GetImageCount(BinaryReader reader) {
 			return ((int)reader.BaseStream.Length - HeaderSize) / 4;
 		}
@@ -26,10 +28,10 @@ namespace S4GFX.FileReader
 		/// </summary>
 		/// <param name="startReader">The file reader</param>
 		/// <returns>The file reader starting offset from the header</returns>
-		protected BinaryReader ReadResource(BinaryReader startReader) {
+		protected void ReadResource(BinaryReader startReader) {
 			if(startReader.BaseStream.Length < HeaderSize) {
 				Console.WriteLine($"Wrong file size! Wanted: {HeaderSize}, got {startReader.BaseStream.Length}");
-				return null;
+				return;
 			}
 
 			magic = startReader.ReadInt32();
@@ -38,7 +40,7 @@ namespace S4GFX.FileReader
 			flag3 = startReader.ReadInt32();
 			flag4 = startReader.ReadInt32();
 
-			return new BinaryReader(startReader.BaseStream);
+			baseStream = startReader.BaseStream;
 		}
 
 		override public string ToString() {

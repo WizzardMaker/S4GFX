@@ -17,7 +17,7 @@ namespace S4GFX.FileReader{
 		}
 
 		public int GetOffset(int gfxImageIndex) {
-			return (pilFile.GetOffset(gfxImageIndex) - paletteFileOffset) / 2;
+			return (pilFile.GetOffset(gfxImageIndex) - paletteFileOffset) / 2; //Offset to the palette info for a image. ( / 2, because a palette color is 2 byte long)
 		}
 
 		public PaletteCollection(BinaryReader pa6File, PilFileReader pilFile) {

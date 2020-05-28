@@ -17,6 +17,8 @@ namespace S4GFX
 		static bool removeAlpha, removeShadows;
 
 		static void Main(string[] args) {
+			Console.WriteLine("Place this exe in the Settler IV folder.");
+			Console.WriteLine("Images will be saved to the \"export\" folder.");
 			Console.WriteLine("Export all: (1), Export one group: (2), Export one individual: (3)");
 			string choice = Console.ReadLine();
 
@@ -85,7 +87,7 @@ namespace S4GFX
 
 			gfxFile = null;
 			GC.Collect();
-			//Console.ReadKey();
+			Console.ReadKey();
 		}
 
 		public static void AskRemoveShadowsAndAlpha() {
@@ -121,22 +123,22 @@ namespace S4GFX
 		static public GfxFileReader DoLoad(string fileId, bool usePli, bool useJil) {
 			//Console.WriteLine($"Using .jil={useJil}");
 
-			var gfx = new BinaryReader(File.Open(fileId + ".gfx", FileMode.Open));
-			var gil = new BinaryReader(File.Open(fileId + ".gil", FileMode.Open));
+			var gfx = new BinaryReader(File.Open(fileId + ".gfx", FileMode.Open),Encoding.Default, true);
+			var gil = new BinaryReader(File.Open(fileId + ".gil", FileMode.Open), Encoding.Default, true);
 
 			BinaryReader paletteIndex, palette, directionIndex = null, jobIndex = null;
 
 			if (usePli) {
-				paletteIndex = new BinaryReader(File.Open(fileId + ".pil", FileMode.Open));
-				palette = new BinaryReader(File.Open(fileId + ".pa6", FileMode.Open));
+				paletteIndex = new BinaryReader(File.Open(fileId + ".pil", FileMode.Open), Encoding.Default, true);
+				palette = new BinaryReader(File.Open(fileId + ".pa6", FileMode.Open), Encoding.Default, true);
 			} else {
-				paletteIndex = new BinaryReader(File.Open(fileId + ".pi4", FileMode.Open));
-				palette = new BinaryReader(File.Open(fileId + ".p46", FileMode.Open));
+				paletteIndex = new BinaryReader(File.Open(fileId + ".pi4", FileMode.Open), Encoding.Default, true);
+				palette = new BinaryReader(File.Open(fileId + ".p46", FileMode.Open), Encoding.Default, true);
 			}
 
 			if (useJil) {
-				directionIndex = new BinaryReader(File.Open(fileId + ".dil", FileMode.Open));
-				jobIndex = new BinaryReader(File.Open(fileId + ".jil", FileMode.Open));
+				directionIndex = new BinaryReader(File.Open(fileId + ".dil", FileMode.Open), Encoding.Default, true);
+				jobIndex = new BinaryReader(File.Open(fileId + ".jil", FileMode.Open), Encoding.Default, true);
 			}
 
 			
@@ -154,6 +156,14 @@ namespace S4GFX
 			}
 
 			gfxFile = new GfxFileReader(gfx, gfxIndexList, jobIndexList, directionIndexList, paletteCollection);
+
+			gfx?.Close();
+			gil?.Close();
+			paletteIndex?.Close();
+			palette?.Close();
+			directionIndex?.Close();
+			jobIndex?.Close();
+
 			return gfxFile;
 		}
 
@@ -173,6 +183,20 @@ namespace S4GFX
 
 			Console.WriteLine($"Saved: " + path);
 		}
+
+		//private static GfxImage LoadFromBitmap(string path, int i, GfxFileReader file) {
+		//	GfxImage image = file.GetImage(i);
+		//	ImageData data = new ImageData(image.Height, image.Width);
+
+		//	Bitmap map = new Bitmap($"export/{path}/{i}.png");
+
+		//	for (int y = 0; y < image.Height; y++) {
+		//		for (int x = 0; x < image.Width; x++) {
+		//			Color c = map.GetPixel(x, y);
+					
+		//		}
+		//	}
+		//}
 
 		private static void SaveToBitmap(string path, int i, GfxFileReader file) {
 			GfxImage image = file.GetImage(i);
@@ -202,8 +226,8 @@ namespace S4GFX
 					}
 				}
 
-				Directory.CreateDirectory(path);
-				b.Bitmap.Save($"{path}/{i}.png", System.Drawing.Imaging.ImageFormat.Png);
+				Directory.CreateDirectory("export/"+path);
+				b.Bitmap.Save($"export/{path}/{i}.png", System.Drawing.Imaging.ImageFormat.Png);
 				//if( i % 50 == 0)
 					//Console.WriteLine($"Saved {i}/{gfxFile.GetImageCount()}");
 			}

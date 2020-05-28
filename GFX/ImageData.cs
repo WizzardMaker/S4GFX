@@ -10,7 +10,7 @@ namespace S4GFX.GFX
 	{
 		public Byte[] data;
 
-		int height, width;
+		public int height, width;
 
 		public ImageData(int height, int width) {
 			this.height = height;

@@ -27,6 +27,10 @@ namespace S4GFX.GFX
 			return palette[index];
 		}
 
+		public int GetIndex(int offset,UInt32 color) {
+			return Array.IndexOf(palette, color, Math.Max(2,offset));
+		}
+
 		public int Read3BytePalette(Byte[] buffer, int pos) {
 			for(int i = 0; i < palette.Length; i++) {
 				int r = buffer[pos++];

@@ -7,6 +7,10 @@ using System.Threading.Tasks;
 
 namespace S4GFX.FileReader
 {
+
+	/// <summary>
+	/// The offset of each image in a gfx to their palette in the palette file
+	/// </summary>
 	class PilFileReader : FileReaderBase
 	{
 		Int32[] offsetTable;

@@ -13,6 +13,11 @@ namespace S4GFX.FileReader
 		GfxImage[] images;
 		bool isWordHeader;
 
+		GilFileReader offsetTable;
+		JilFileReader jobIndexList;
+		DilFileReader directionIndexList;
+		PaletteCollection paletteCollection;
+
 		public int GetImageCount() {
 			return images != null ? images.Length : 0;
 		}
@@ -25,21 +30,54 @@ namespace S4GFX.FileReader
 			return images[index];
 		}
 
-		public void ResizeImage(int index, int width, int height) {
-			GfxImage image = images[index];
+		//public void ChangeImageData(int index, ImageData newData) {
+		//	BinaryReader reader = new BinaryReader(baseStream);
+		//	reader.BaseStream.Seek(0, SeekOrigin.Begin);
 
-			int oldSize = image.Width * image.Height * 4;
-			int offsetToAdd = width * height * 4 - oldSize;
+		//	GfxImage image = images[index];
 
-			offsetTable.AddOffsetToFollowing(index+1, offsetToAdd);
-		}
+		//	Byte[] oldData = reader.ReadBytes((int)baseStream.Length);
+		//	reader.Close();
 
-		GilFileReader offsetTable;
-		JilFileReader jobIndexList;
-		DilFileReader directionIndexList;
-		PaletteCollection paletteCollection;
+		//	Byte[] newDataBuffer = new Byte[(int)baseStream.Length + offsetToAdd];
+		//	Buffer.BlockCopy(oldData, 0, newDataBuffer, 0, image.DataOffset);
+
+		//	//write new data
+
+
+		//	int offsetToAdd = newData.width * newData.height * 4 - oldSize;
+
+		//	offsetTable.AddOffsetToFollowing(index + 1, offsetToAdd);
+
+
+		//	Buffer.BlockCopy(oldData, 0, newDataBuffer, 0, image.DataOffset);
+		//}
+
+		//void ResizeImage(int index, int width, int height) {
+		//	GfxImage image = images[index];
+
+		//	int oldSize = image.Width * image.Height * 4;
+		//	int offsetToAdd = width * height * 4 - oldSize;
+
+		//	//Set new values
+		//	image.Width = width;
+		//	image.Height = height;
+
+		//	//Add offset to all other images in the GIL offsetTable
+		//	offsetTable.AddOffsetToFollowing(index+1, offsetToAdd);
+
+		//	//Offset all other files
+		//	for (int a = 0; a < images.Length; a++) {
+		//		GfxImage i = (GfxImage)images[a];
+		//		i.DataOffset = offsetTable.GetImageOffset(a) + (i.headType ? 8:12);
+		//	}
+		//}
+
+		//public void SetNewImageData(int index, ImageData newData) {
+		//	ResizeImage(index, newData.width, newData.height);
+		//}
 		public GfxFileReader(BinaryReader reader,
-			GilFileReader offsetTable, JilFileReader jobIndexList, DilFileReader directionIndexList, PaletteCollection paletteCollection)  {
+			GilFileReader offsetTable, JilFileReader jobIndexList, DilFileReader directionIndexList, PaletteCollection paletteCollection) {
 
 			this.offsetTable = offsetTable;
 			this.jobIndexList = jobIndexList;
@@ -73,8 +111,11 @@ namespace S4GFX.FileReader
 				//Console.WriteLine($"JIL Offset: {jobIndex} in image {i}");
 
 				images[i] = ReadImage(reader, gfxOffset, paletteCollection.GetPalette(), paletteCollection.GetOffset(jobIndex), buffer);
+				images[i].jobIndex = jobIndex;
 			}
 		}
+
+		//void WriteImage(BinaryWriter writer, int offset,)
 
 		GfxImage ReadImage(BinaryReader reader, int offset, Palette palette, int paletteOffset, Byte[] buffer) {
 			reader.BaseStream.Seek(offset, SeekOrigin.Begin);
@@ -87,7 +128,7 @@ namespace S4GFX.FileReader
 
 
 			if(imgHeadType > 860) {
-				isWordHeader = true;
+				isWordHeader = false;
 
 				newImg.headType = true;
 				newImg.Width = reader.ReadByte();
@@ -102,7 +143,7 @@ namespace S4GFX.FileReader
 
 				newImg.DataOffset = offset + 8;
 			} else {
-				isWordHeader = false;
+				isWordHeader = true;
 
 				newImg.headType = false;
 				newImg.Width = reader.ReadInt16();

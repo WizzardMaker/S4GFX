@@ -8,10 +8,11 @@
     <OutputType>Exe</OutputType>
     <RootNamespace>S4GFX</RootNamespace>
     <AssemblyName>S4GFX</AssemblyName>
-    <TargetFrameworkVersion>v4.6</TargetFrameworkVersion>
+    <TargetFrameworkVersion>v4.7.2</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
     <Deterministic>true</Deterministic>
+    <TargetFrameworkProfile />
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <PlatformTarget>AnyCPU</PlatformTarget>
@@ -36,6 +37,9 @@
     <Reference Include="System" />
     <Reference Include="System.Core" />
     <Reference Include="System.Drawing" />
+    <Reference Include="System.Drawing.Common, Version=4.0.0.1, Culture=neutral, PublicKeyToken=cc7b13ffcd2ddd51, processorArchitecture=MSIL">
+      <HintPath>packages\System.Drawing.Common.4.7.0\lib\net461\System.Drawing.Common.dll</HintPath>
+    </Reference>
     <Reference Include="System.Xml.Linq" />
     <Reference Include="System.Data.DataSetExtensions" />
     <Reference Include="Microsoft.CSharp" />
@@ -44,24 +48,18 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="FileReader\DilFileReader.cs" />
-    <Compile Include="FileReader\FileReaderBase.cs" />
-    <Compile Include="FileReader\GfxFileReader.cs" />
-    <Compile Include="FileReader\GhFileReader.cs" />
-    <Compile Include="FileReader\GilFileReader.cs" />
-    <Compile Include="FileReader\JilFileReader.cs" />
-    <Compile Include="FileReader\PaletteCollection.cs" />
-    <Compile Include="FileReader\PilFileReader.cs" />
-    <Compile Include="GFX\DirectBitmap.cs" />
-    <Compile Include="GFX\GfxImage.cs" />
-    <Compile Include="GFX\IGfxImage.cs" />
-    <Compile Include="GFX\ImageData.cs" />
-    <Compile Include="GFX\Palette.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />
+    <None Include="packages.config" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\S4GFXFramework\S4GFXFramework.csproj">
+      <Project>{b026cf90-02d2-4229-9f34-b24f3c8ea3c2}</Project>
+      <Name>S4GFXFramework</Name>
+    </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

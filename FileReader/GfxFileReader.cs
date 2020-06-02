@@ -73,7 +73,7 @@ namespace S4GFX.FileReader
 			newDataBuffer[nextImageStartOffset+ offset - 1] = 0;
 			newDataBuffer[nextImageStartOffset+ offset - 2] = 1;
 
-			Buffer.BlockCopy(oldData, nextImageStartOffset - offset, newDataBuffer, offsetTable.GetImageOffset(index + 1), oldData.Length- nextImageStartOffset);
+			Buffer.BlockCopy(oldData, nextImageStartOffset, newDataBuffer, offsetTable.GetImageOffset(index + 1), oldData.Length- nextImageStartOffset);
 
 			File.WriteAllBytes("14TEST.gfx", newDataBuffer); //TODO! Change file name!
 		}

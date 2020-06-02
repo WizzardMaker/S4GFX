@@ -161,7 +161,8 @@ namespace S4GFX.GFX
 					valueIsOperator = true;
 				} else {
 					value = palette.GetIndex(paletteOffset, Palette.RGBToPalette(red, green, blue));
-					value = Math.Max((byte)paletteOffset+2, ((byte)value));
+					value = value - paletteOffset;
+					value = Math.Max((byte)2, ((byte)value));
 				}
 				int count = 1;
 

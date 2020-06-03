@@ -13,6 +13,7 @@ namespace S4GFX
 	class Program
 	{
 		static GfxFileReader gfxFile;
+		static SndFileReader sndFile;
 
 		static bool removeAlpha, removeShadows;
 
@@ -20,10 +21,22 @@ namespace S4GFX
 			Console.WriteLine("=Settler IV image exporter/importer=========================");
 			Console.WriteLine("Place this exe in the Settler IV folder!");
 			Console.WriteLine("Exported images will be saved to the \"export/gfx/%GROUP%/\" folder.");
+			Console.WriteLine("Exported sounds will be saved to the \"export/snd/\" folder. Run with --snd to extract sound files.");
 			Console.WriteLine("============================================================");
+
+			if (args.Contains("--snd"))
+			{ // --snd argument has been passed to the exe
+				sndFile = LoadSnd("Snd/0");
+				if (sndFile == null)
+					Console.WriteLine("Error: Cannot export sounds because 0.sil or 0.snd is not available.");
+				else
+					SaveAllSounds("Snd/0");
+			}
+
 			Console.WriteLine("");
 			Console.WriteLine("Export all: (1), Export one group: (2), Export one single image: (3), Import one single image (4)");
 			Console.WriteLine("");
+
 			string choice = Console.ReadLine();
 
 			switch (choice) {
@@ -167,6 +180,30 @@ namespace S4GFX
 			}
 		}
 
+		static public SndFileReader LoadSnd(string fileId)
+		{
+			bool sil = File.Exists(fileId + ".sil");
+			if (sil == false) {
+				return null;
+			}
+
+			bool snd = File.Exists(fileId + ".snd");
+			if (!snd) {
+				return null;
+			}
+
+			var silBinaryReader = new BinaryReader(File.Open(fileId + ".sil", FileMode.Open), Encoding.Default, true);
+			var sndBinaryReader = new BinaryReader(File.Open(fileId + ".snd", FileMode.Open), Encoding.Default, true);
+
+			var silReader = new SilFileReader(silBinaryReader);
+			sndFile = new SndFileReader(sndBinaryReader, silReader);
+
+			silBinaryReader?.Close();
+			sndBinaryReader?.Close();
+
+			return sndFile;
+		}
+
 		static public GfxFileReader Load(string fileId) {
 
 			bool gfx = File.Exists(fileId + ".gfx");
@@ -228,7 +265,24 @@ namespace S4GFX
 			return gfxFile;
 		}
 
-		static void SaveAllBitmaps(string path, GfxFileReader file = null) {
+		private static void SaveAllSounds(string path, SndFileReader file = null) {
+			Console.WriteLine($"Start saving: " + path);
+			file = file ?? sndFile;
+
+			for (int i = 1; i < file.GetSoundCount(); i++) {
+				try {
+					Directory.CreateDirectory("export/" + path);
+					File.WriteAllBytes($"export/{path}/{i}.wav", file.GetSound(i));
+				}catch(Exception e) {
+					Console.WriteLine(e.Message);
+					Console.WriteLine(e.StackTrace);
+				}
+			}
+
+			Console.WriteLine($"Saved: " + path);
+		}
+
+		private static void SaveAllBitmaps(string path, GfxFileReader file = null) {
 			Console.WriteLine($"Start saving: " + path);
 			//Parallel.For(0, gfxFile.GetImageCount(), (i) => { SaveToBitmap(path, i); });
 			file = file ?? gfxFile;

@@ -4,18 +4,16 @@
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProjectGuid>{E84B12EB-4801-4AB2-BA01-DF6235B60B0F}</ProjectGuid>
-    <OutputType>Exe</OutputType>
-    <RootNamespace>S4GFX</RootNamespace>
-    <AssemblyName>S4GFX</AssemblyName>
+    <ProjectGuid>{C0E1EF4D-7C29-45B2-8B98-F4A5A2479075}</ProjectGuid>
+    <OutputType>Library</OutputType>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <RootNamespace>S4GFXLibrary</RootNamespace>
+    <AssemblyName>S4GFXLibrary</AssemblyName>
     <TargetFrameworkVersion>v4.6</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
-    <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
     <Deterministic>true</Deterministic>
-    <TargetFrameworkProfile />
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
-    <PlatformTarget>AnyCPU</PlatformTarget>
     <DebugSymbols>true</DebugSymbols>
     <DebugType>full</DebugType>
     <Optimize>false</Optimize>
@@ -25,7 +23,6 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
-    <PlatformTarget>AnyCPU</PlatformTarget>
     <DebugType>pdbonly</DebugType>
     <Optimize>true</Optimize>
     <OutputPath>bin\Release\</OutputPath>
@@ -45,17 +42,20 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Program.cs" />
+    <Compile Include="FileReader\DilFileReader.cs" />
+    <Compile Include="FileReader\FileReaderBase.cs" />
+    <Compile Include="FileReader\GfxFileReader.cs" />
+    <Compile Include="FileReader\GhFileReader.cs" />
+    <Compile Include="FileReader\GilFileReader.cs" />
+    <Compile Include="FileReader\JilFileReader.cs" />
+    <Compile Include="FileReader\PaletteCollection.cs" />
+    <Compile Include="FileReader\PilFileReader.cs" />
+    <Compile Include="GFX\DirectBitmap.cs" />
+    <Compile Include="GFX\GfxImage.cs" />
+    <Compile Include="GFX\IGfxImage.cs" />
+    <Compile Include="GFX\ImageData.cs" />
+    <Compile Include="GFX\Palette.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="App.config" />
-  </ItemGroup>
-  <ItemGroup>
-    <ProjectReference Include="..\S4GFXLibrary\S4GFXLibrary.csproj">
-      <Project>{c0e1ef4d-7c29-45b2-8b98-f4a5a2479075}</Project>
-      <Name>S4GFXLibrary</Name>
-    </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

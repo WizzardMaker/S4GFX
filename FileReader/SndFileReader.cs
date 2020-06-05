@@ -65,5 +65,9 @@ namespace S4GFX.FileReader
 
 			return reader.ReadBytes(sndSize);
 		}
+
+		public override byte[] GetData() {
+			throw new NotImplementedException();
+		}
 	}
 }

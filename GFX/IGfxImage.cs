@@ -18,5 +18,7 @@ namespace S4GFX.GFX
 
 		int Flag1 { get; set; }
 		int Flag2 { get; set; }
+
+		Byte[] GetData();
 	}
 }

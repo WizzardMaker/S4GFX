@@ -9,14 +9,21 @@ namespace S4GFX.GFX
 {
 	class Palette
 	{
-		UInt32[] palette;
+		public UInt32[] palette;
 
 		public Palette(int count = 256) {
 			palette = new UInt32[count];
 		}
 
+		public Palette(Palette copy) {
+			this.palette = (UInt32[])copy.palette.Clone();
+		}
+
 		public void SetRGB(int index, int r, int g, int b) {
 			palette[index] = (uint)(r | (g << 8) | (b << 16) | (255 << 24));
+		}
+		public void SetColor(int index, UInt32 color) {
+			palette[index] = color;
 		}
 
 		public static UInt32 RGBToPalette(int r, int g, int b) {
@@ -69,7 +76,7 @@ namespace S4GFX.GFX
 		public void Write16BitPalette(BinaryWriter buffer, int pos = 0) {
 			buffer.BaseStream.Seek(pos, SeekOrigin.Begin);
 
-			for (int i = 0; i < palette.Length; i++) {
+			for (int i = pos; i < palette.Length; i++) {
 				UInt32 color = GetColor(i);
 
 				int r = (int)(color & 0b0000_0000_0000_0000_1111_1111);

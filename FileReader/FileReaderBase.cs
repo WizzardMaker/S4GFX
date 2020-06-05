@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace S4GFX.FileReader
 {
-	class FileReaderBase
+	abstract class FileReaderBase
 	{
 		int magic;
 		int flag1;
@@ -60,5 +60,7 @@ namespace S4GFX.FileReader
 
 			return data;
 		}
+
+		public abstract Byte[] GetData();
 	}
 }

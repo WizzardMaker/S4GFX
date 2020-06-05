@@ -47,9 +47,7 @@ namespace S4GFX.FileReader
 			}
 		}
 
-
-
-		public byte[] GetData() {
+		override public byte[] GetData() {
 			Byte[] data = new Byte[(int)baseStream.Length];
 
 			using (BinaryWriter writer = new BinaryWriter(new MemoryStream(data))) {

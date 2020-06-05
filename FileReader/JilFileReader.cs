@@ -16,13 +16,22 @@ namespace S4GFX.FileReader
 			
 			for (int i = 0; i < offsetTable.Length; i++) {
 				if (offsetTable[i] == offset) {
-					//Console.WriteLine($"JIL {dirOffset} --> {i}");
+					//Console.WriteLine($"JIL index:{dirOffset} --> jil:{i} at offset:{offset}");
+					//Console.WriteLine($"JIL dil:{dirOffset} --> jil{i}");
 					return i;
 				}
 			}
 
 			//Console.WriteLine($"Unable to find offset dirOffset: {dirOffset}");
 			return -1;
+		}
+
+		public void FakeLookupOffset(int length) {
+			offsetTable = new Int32[length];
+
+			for (int i = 0; i < offsetTable.Length; i++) {
+				offsetTable[i] = i  * 4 + HeaderSize;
+			}
 		}
 
 		public JilFileReader(BinaryReader reader) {
@@ -36,6 +45,26 @@ namespace S4GFX.FileReader
 			for (int i = 0; i < imageCount; i++) {
 				offsetTable[i] = reader.ReadInt32();
 			}
+		}
+		override public byte[] GetData() {
+			Byte[] data = new Byte[offsetTable.Length * 4 + HeaderSize];
+
+			using (BinaryWriter writer = new BinaryWriter(new MemoryStream(data))) {
+				writer.Write(GetHeaderData());
+				//magic = startReader.ReadInt32();
+				//flag1 = startReader.ReadInt32();
+				//flag2 = startReader.ReadInt32();
+				//flag3 = startReader.ReadInt32();
+				//flag4 = startReader.ReadInt32();
+
+				writer.Seek(HeaderSize, SeekOrigin.Begin);
+
+				for (int i = 0; i < offsetTable.Length; i++) {
+					writer.Write((Int32)offsetTable[i]);
+				}
+			}
+
+			return data;
 		}
 	}
 }

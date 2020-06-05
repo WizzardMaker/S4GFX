@@ -142,6 +142,34 @@ namespace S4GFX
 					gfxFile.ChangeImageData(image, data);
 				}
 				break;
+				case "5": { //Secret test key
+					REPEAT_SINGLE_GROUP:
+					Console.WriteLine("What group would you like to export an image from?");
+					string choiceGroup = Console.ReadLine();
+
+					string path = "GFX/" + choiceGroup;
+					if (!File.Exists(path + ".gfx")) {
+						Console.WriteLine($"Group {path} does not exist!");
+						goto REPEAT_SINGLE_GROUP;
+					}
+					Load(path);
+
+					gfxFile.RemoveDILDependence();
+
+					REPEAT_SINGLE_IMAGE:
+					Console.WriteLine($"What number has the image you want to export? This group contains: {gfxFile.GetImageCount()} images");
+					string choiceImage = Console.ReadLine();
+
+					int image = int.Parse(choiceImage);
+					if (image > gfxFile.GetImageCount()) {
+						Console.WriteLine($"There is no image nr. {image}!");
+						goto REPEAT_SINGLE_IMAGE;
+					}
+
+					AskRemoveShadowsAndAlpha();
+					SaveToBitmap(path, image, gfxFile);
+				}
+				break;
 			}
 
 			Console.WriteLine("");

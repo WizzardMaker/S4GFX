@@ -8,8 +8,7 @@ using S4GFX.GFX;
 
 namespace S4GFX.FileReader
 {
-	class GfxFileReader : FileReaderBase
-	{
+	class GfxFileReader : FileReaderBase {
 		GfxImage[] images;
 		bool isWordHeader;
 
@@ -23,14 +22,18 @@ namespace S4GFX.FileReader
 		}
 
 		public GfxImage GetImage(int index) {
-			if((index < 0) || (index >= images.Length)) {
+			if ((index < 0) || (index >= images.Length)) {
 				return null;
 			}
 
 			return images[index];
 		}
 
-		public void ChangeImageData(int index, ImageData newData) { 
+		public void ChangeImageData(int index, ImageData newData) {
+			if (newData.GetUsedColors().Length > 255) {
+				throw (new Exception("Imported images cannot have more than 255 colors!"));
+			}
+
 			//Read the old data
 			BinaryReader reader = new BinaryReader(baseStream);
 			reader.BaseStream.Seek(0, SeekOrigin.Begin);
@@ -41,7 +44,7 @@ namespace S4GFX.FileReader
 			Byte[] imageDataToWrite = image.CreateImageData(newData); //The new bytes which are to be written to the gfx file
 
 			int nextImageStartOffset = offsetTable.GetImageOffset(index + 1); //Get the current offset of the next image
-			int offset = Math.Max(0, ((images[index].DataOffset + imageDataToWrite.Length) - nextImageStartOffset)-1); //Our data could be larger, calculate how much larger
+			int offset = Math.Max(0, ((images[index].DataOffset + imageDataToWrite.Length) - nextImageStartOffset) - 1); //Our data could be larger, calculate how much larger
 
 			Byte[] newDataBuffer = new Byte[(int)baseStream.Length + offset];//Our new data
 			Buffer.BlockCopy(oldData, 0, newDataBuffer, 0, image.DataOffset);//Fill it with the old data, up until our new image. We don't need to rewrite it, it still works
@@ -60,7 +63,7 @@ namespace S4GFX.FileReader
 			int newImageOffset = offsetTable.GetImageOffset(index);
 			if (image.headType) { //All sizes are 8Bit when true
 				newDataBuffer[newImageOffset] = (Byte)newData.width;//width
-				newDataBuffer[newImageOffset+1] = (Byte)newData.height;//height
+				newDataBuffer[newImageOffset + 1] = (Byte)newData.height;//height
 			} else { //16bit values
 				newDataBuffer[newImageOffset] = (Byte)newData.width; //width 1. Byte
 				newDataBuffer[newImageOffset + 1] = (Byte)(newData.width >> 8); //width 2. Byte
@@ -70,37 +73,16 @@ namespace S4GFX.FileReader
 			}
 
 			//All files end with 0 and 1! This marks the end of the file
-			newDataBuffer[nextImageStartOffset+ offset - 1] = 0;
-			newDataBuffer[nextImageStartOffset+ offset - 2] = 1;
+			newDataBuffer[nextImageStartOffset + offset - 1] = 0;
+			newDataBuffer[nextImageStartOffset + offset - 2] = 1;
 
-			Buffer.BlockCopy(oldData, nextImageStartOffset, newDataBuffer, offsetTable.GetImageOffset(index + 1), oldData.Length- nextImageStartOffset);
+			//UpdatePalette(index, image, newData);
+
+			Buffer.BlockCopy(oldData, nextImageStartOffset, newDataBuffer, offsetTable.GetImageOffset(index + 1), oldData.Length - nextImageStartOffset);
 
 			File.WriteAllBytes("14TEST.gfx", newDataBuffer); //TODO! Change file name!
 		}
 
-		//void ResizeImage(int index, int width, int height) {
-		//	GfxImage image = images[index];
-
-		//	int oldSize = image.Width * image.Height * 4;
-		//	int offsetToAdd = width * height * 4 - oldSize;
-
-		//	//Set new values
-		//	image.Width = width;
-		//	image.Height = height;
-
-		//	//Add offset to all other images in the GIL offsetTable
-		//	offsetTable.AddOffsetToFollowing(index+1, offsetToAdd);
-
-		//	//Offset all other files
-		//	for (int a = 0; a < images.Length; a++) {
-		//		GfxImage i = (GfxImage)images[a];
-		//		i.DataOffset = offsetTable.GetImageOffset(a) + (i.headType ? 8:12);
-		//	}
-		//}
-
-		//public void SetNewImageData(int index, ImageData newData) {
-		//	ResizeImage(index, newData.width, newData.height);
-		//}
 		public GfxFileReader(BinaryReader reader,
 			GilFileReader offsetTable, JilFileReader jobIndexList, DilFileReader directionIndexList, PaletteCollection paletteCollection) {
 
@@ -120,20 +102,13 @@ namespace S4GFX.FileReader
 			images = new GfxImage[count];
 
 			int lastGood = 0;
-			for(int i = 0; i < count; i++) {
+			for (int i = 0; i < count; i++) {
 				int gfxOffset = offsetTable.GetImageOffset(i);
 
-				int jobIndex = i;
+				int jobIndex = GetPaletteOffsetIndex(i);
 
-				if(directionIndexList != null) {
-					int dirOffset = directionIndexList.ReverseLookupOffset(i);
+				//Console.WriteLine($"JIL Offset: {jobIndex} == {reference}");
 
-					jobIndex = jobIndexList.ReverseLookupOffset(dirOffset);
-					jobIndex = jobIndex == -1 ? lastGood : jobIndex;
-					lastGood = jobIndex;
-				}
-
-				//Console.WriteLine($"JIL Offset: {jobIndex} in image {i}");
 
 				images[i] = ReadImage(reader, gfxOffset, paletteCollection.GetPalette(), paletteCollection.GetOffset(jobIndex), buffer);
 				images[i].jobIndex = jobIndex;
@@ -142,7 +117,102 @@ namespace S4GFX.FileReader
 			//ChangeImageData(2, images[2].GetImageData());
 		}
 
-		//void WriteImage(BinaryWriter writer, int offset,)
+		public int GetPaletteOffsetIndex(int imageIndex) {
+			int lastGood = 0;
+			int jobIndex = 0;
+
+			Console.WriteLine($"JIL Search for:{imageIndex}");
+
+			for (int i = 0; i <= imageIndex; i++) {
+				int gfxOffset = offsetTable.GetImageOffset(i);
+
+				jobIndex = i;
+
+				if (directionIndexList != null) {
+					int dirOffset = directionIndexList.ReverseLookupOffset(i);
+
+					jobIndex = jobIndexList.ReverseLookupOffset(dirOffset);
+					jobIndex = jobIndex == -1 ? lastGood : jobIndex;
+					lastGood = jobIndex;
+				}
+			}
+
+			return jobIndex;
+		}
+
+		/// <summary>
+		/// Connected images in the sense of, images that share a palette
+		/// </summary>
+		/// <param name="jil"></param>
+		/// <returns></returns>
+		public int[] GetConnectedImages(int jil) {
+			List<int> imgs = new List<int>();
+
+			for (int i = 0; i < images.Length; i++) {
+				if (GetPaletteOffsetIndex(i) == jil) {
+					imgs.Add(i);
+				}
+			}
+
+			return imgs.ToArray();
+		}
+
+
+		/// <summary>
+		/// Temporary function to remove the DIL and JIL "feature" - turns out, the game uses it for more than palette informations
+		/// </summary>
+		public void RemoveDILDependence() {
+			//Prepare the colors for the palette generation
+			ImageData[] colorData = new ImageData[images.Length];
+			for (int j = 0; j < images.Length; j++) {
+				colorData[j] = images[j].GetImageData();
+				UInt32[] colorsToBeAdded = colorData[j].GetUsedColors();
+			}
+
+			PilFileReader pil = paletteCollection.GetPilFile();
+			pil.Resize(images.Length);
+
+			paletteCollection.SetPalette(new Palette((256 * images.Length + 20) * 2)); //maximum size for a palette. We could shrink it to size, but we don't have to
+
+			for (int j = 0; j < images.Length; j++) {
+				GfxImage i = images[j];
+				int newPaletteOffset = (255 * j) + 20; //Set according to JIL/normal palette offset.
+				i.paletteOffset = newPaletteOffset;
+				i.palette = paletteCollection.GetPalette();
+
+				RecreatePalette(j, (255 * j) + 20, colorData[j]); //Skip repeating JIL entries. They share the same palette
+				i.buffer = i.CreateImageData(colorData[j]);
+				i.DataOffset = 0; //Hack, the data is still at the same offset, but the way the we handle the reading forces us to set it to 0, as we write the new image data to buffer[0...] instead of buffer[DataOffset...]
+			}
+			byte[] gfxDataBuffer = GetData();
+
+			Byte[] pilDataBuffer = paletteCollection.GetPilFile().GetData();
+			Byte[] paletteDataBuffer = paletteCollection.GetData();
+
+			//directionIndexList.FakeLookupOffset(images.Length, jobIndexList); //Make every DIL entry point to itself. Doesnt work though in game
+			//jobIndexList.FakeLookupOffset(images.Length);
+
+			File.WriteAllBytes("3.gfx", gfxDataBuffer); //TODO! Change file name!
+			File.WriteAllBytes("3.pi4", pilDataBuffer); //TODO! Change file name!
+			File.WriteAllBytes("3.p46", paletteDataBuffer); //TODO! Change file name!
+			File.WriteAllBytes("3.pi2", pilDataBuffer); //TODO! Change file name!
+			File.WriteAllBytes("3.p26", paletteDataBuffer); //TODO! Change file name!
+			File.WriteAllBytes("3.dil", directionIndexList.GetData()); //TODO! Change file name!
+			File.WriteAllBytes("3.jil", jobIndexList.GetData()); //TODO! Change file name!
+		}
+
+
+		public void RecreatePalette(int index, int paletteOffset, ImageData orig) {
+			PilFileReader pil = paletteCollection.GetPilFile();
+			Palette p = paletteCollection.GetPalette();
+
+			pil.SetOffset(index, paletteOffset);
+			UInt32[] colorsToBeAdded = orig.GetUsedColors();
+
+			for(int i = paletteOffset; i < colorsToBeAdded.Length + paletteOffset; i++) {
+				p.SetColor(i+2, colorsToBeAdded[i-paletteOffset]);
+			}
+		}
 
 		GfxImage ReadImage(BinaryReader reader, int offset, Palette palette, int paletteOffset, Byte[] buffer) {
 			reader.BaseStream.Seek(offset, SeekOrigin.Begin);
@@ -152,7 +222,6 @@ namespace S4GFX.FileReader
 			GfxImage newImg = new GfxImage(buffer, palette, paletteOffset);
 
 			reader.BaseStream.Seek(offset, SeekOrigin.Begin);
-
 
 			if(imgHeadType > 860) {
 				isWordHeader = false;
@@ -188,6 +257,39 @@ namespace S4GFX.FileReader
 			}
 
 			return newImg;
+		}
+
+		override public byte[] GetData() {
+			Byte[] header = new Byte[HeaderSize];
+
+			using (BinaryWriter writer = new BinaryWriter(new MemoryStream(header))) {
+				writer.Write(GetHeaderData());
+
+				writer.Seek(HeaderSize, SeekOrigin.Begin);
+			}
+
+			Byte[] gfxDataBuffer = new Byte[(int)baseStream.Length];
+			Buffer.BlockCopy(header, 0, gfxDataBuffer, 0, header.Length);
+
+			for (int j = 0; j < images.Length; j++) {
+				int offset = offsetTable.GetImageOffset(j);
+				byte[] data = images[j].GetData();
+
+				int size = data.Length;
+
+				if (data.Length + offset > gfxDataBuffer.Length) {
+					size = gfxDataBuffer.Length - offset;
+				}
+
+				Buffer.BlockCopy(data, 0, gfxDataBuffer, offset, size);
+
+				if ((j + 1) < images.Length) {
+					gfxDataBuffer[offsetTable.GetImageOffset(j + 1) - 1] = 0;
+					gfxDataBuffer[offsetTable.GetImageOffset(j + 1) - 2] = 1;
+				}
+			}
+
+			return gfxDataBuffer;
 		}
 	}
 }

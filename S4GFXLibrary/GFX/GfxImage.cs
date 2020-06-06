@@ -1,9 +1,14 @@
-﻿using System;
+﻿using S4GFX.FileReader;
+using System;
 using System.Collections.Generic;
+using System.IO;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
 
-namespace S4GFXFramework.GFX
+namespace S4GFXLibrary.GFX
 {
-    public class GfxImage : IGfxImage
+    class GfxImage : IGfxImage
     {
         public int DataOffset { get; set; }
         public int Height { get; set; }
@@ -21,8 +26,22 @@ namespace S4GFXFramework.GFX
 
         public byte[] buffer;
 
-        Palette palette;
-        int paletteOffset;
+        public Palette palette;
+        public int paletteOffset;
+
+        int HeaderSize => headType ? 8 : 12;
+
+        int[] usedPaletteEntries;
+
+        public int[] GetUsedPaletteEntries()
+        {
+            if (usedPaletteEntries == null)
+            {
+                GetImageData();
+            }
+
+            return usedPaletteEntries;
+        }
 
         public GfxImage(byte[] buffer, Palette palette, int paletteOffset)
         {
@@ -43,6 +62,8 @@ namespace S4GFXFramework.GFX
         //then the next value will have the info on how many following pixel are that value
         void GetImageDataWithRunLengthEncoding(byte[] buffer, uint[] imgData, int pos, int length)
         {
+            List<int> paletteEntries = new List<int>();
+
             int j = 0;
 
             while (j < length)
@@ -78,11 +99,14 @@ namespace S4GFXFramework.GFX
                 }
             }
 
+            usedPaletteEntries = paletteEntries.ToArray();
             //Console.WriteLine(count);
         }
 
         public void GetImageDataWithNoEncoding(byte[] buffer, uint[] imgData, int pos, int length)
         {
+            List<int> paletteEntries = new List<int>();
+
             int j = 0;
             while (j < length)
             {
@@ -90,7 +114,11 @@ namespace S4GFXFramework.GFX
                 pos++;
 
                 imgData[j++] = palette.GetColor(paletteOffset + value);
+                if (!paletteEntries.Contains(paletteOffset + value))
+                    paletteEntries.Add(paletteOffset + value);
             }
+
+            usedPaletteEntries = paletteEntries.ToArray();
         }
 
         public byte[] CreateImageData(ImageData newImage)
@@ -116,6 +144,14 @@ namespace S4GFXFramework.GFX
             throw new NotImplementedException();
         }
 
+        /// <summary>
+        /// Counts the times a value was repeated. Used in the RunLengthEncoding as it replaces duplicates by [value,repeats]
+        /// </summary>
+        /// <param name="data">the color data</param>
+        /// <param name="start">start offset in the color data array</param>
+        /// <param name="valueToFind">value we want to count</param>
+        /// <param name="offset">how far we moved in the color array while counting</param>
+        /// <returns></returns>
         private int GetSameValueCount(ref byte[] data, int start, int valueToFind, ref int offset)
         {
             int count = 0;
@@ -187,7 +223,8 @@ namespace S4GFXFramework.GFX
                 else
                 {
                     value = palette.GetIndex(paletteOffset, Palette.RGBToPalette(red, green, blue));
-                    value = Math.Max((byte)paletteOffset + 2, (byte)value);
+                    value = value - paletteOffset;
+                    value = Math.Max((byte)2, (byte)value);
                 }
                 int count = 1;
 
@@ -199,37 +236,13 @@ namespace S4GFXFramework.GFX
                     int offset = 0;
                     count = GetSameValueCount(ref data, i, value, ref offset);
                     newData.Add((byte)count);
-                    //i += count * 4;
+
                     i = offset;
                     dataLength += 1;
                 }
             }
 
             return newData.ToArray();
-            //while (j < length) {
-            //	int value = pos >= buffer.Length ? 0 : buffer[pos];
-            //	pos++;
-
-            //	UInt32 color;
-            //	int count = 1;
-
-            //	if (value <= 1) {
-            //		count = pos >= buffer.Length ? 1 : buffer[pos];
-            //		pos++;
-
-            //		if (value == 0) {
-            //			color = 0xFF0000FF;
-            //		} else {
-            //			color = 0xFF00FF00;
-            //		}
-            //	} else {
-            //		color = palette.GetColor(paletteOffset + value);
-            //	}
-
-            //	for (int i = 0; (i < count) && (j < length); i++) {
-            //		imgData[j++] = color;
-            //	}
-            //}
         }
 
         public ImageData GetImageData()
@@ -252,14 +265,65 @@ namespace S4GFXFramework.GFX
             img.data = new byte[length];
             Buffer.BlockCopy(imgData, 0, img.data, 0, length);
 
-            //byte[] test = CreateImageDataWithRunLengthEncoding(img.data, length);
-            //Buffer.BlockCopy(test, 0, buffer, pos, test.Length);
-
-            //GetImageDataWithRunLengthEncoding(buffer, imgData, pos, length);
-
-            //Buffer.BlockCopy(imgData, 0, img.data, 0, img.data.Length);
-
             return img;
+        }
+
+        public byte[] GetHeaderData()
+        {
+            byte[] data = new byte[HeaderSize];
+
+            using (BinaryWriter writer = new BinaryWriter(new MemoryStream(data)))
+            {
+                if (headType)
+                {
+                    writer.Write((byte)Width);
+                    writer.Write((byte)Height);
+                    writer.Write((byte)left);
+                    writer.Write((byte)top);
+
+
+                    writer.Write((byte)Flag1);
+                    writer.Write((byte)Flag2);
+                }
+                else
+                {
+                    writer.Write((short)Width);
+                    writer.Write((short)Height);
+                    writer.Write((short)left);
+                    writer.Write((short)top);
+
+                    writer.Write((byte)imgType);
+
+
+                    writer.Write((byte)Flag1);
+                    //writer.Write((Byte)Flag2);
+                }
+
+            }
+
+            return data;
+        }
+
+        public byte[] GetData()
+        {
+            byte[] data = new byte[Width * Height * 4 + HeaderSize];
+
+            using (BinaryWriter writer = new BinaryWriter(new MemoryStream(data)))
+            {
+                writer.Write(GetHeaderData());
+
+                writer.Seek(HeaderSize, SeekOrigin.Begin);
+
+                for (int i = DataOffset; i < Width * Height * 4 + DataOffset; i++)
+                {
+                    if (i >= buffer.Length)
+                        break;
+
+                    writer.Write(buffer[i]);
+                }
+            }
+
+            return data;
         }
     }
 }

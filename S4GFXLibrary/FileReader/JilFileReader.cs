@@ -1,8 +1,13 @@
-﻿using System.IO;
+﻿using System;
+using System.Collections.Generic;
+using System.IO;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
 
-namespace S4GFXFramework.FileReader
+namespace S4GFXLibrary.FileReader
 {
-    public class JilFileReader : FileReaderBase
+    class JilFileReader : FileReaderBase
     {
         int[] offsetTable;
 
@@ -14,13 +19,24 @@ namespace S4GFXFramework.FileReader
             {
                 if (offsetTable[i] == offset)
                 {
-                    //Console.WriteLine($"JIL {dirOffset} --> {i}");
+                    //Console.WriteLine($"JIL index:{dirOffset} --> jil:{i} at offset:{offset}");
+                    //Console.WriteLine($"JIL dil:{dirOffset} --> jil{i}");
                     return i;
                 }
             }
 
             //Console.WriteLine($"Unable to find offset dirOffset: {dirOffset}");
             return -1;
+        }
+
+        public void FakeLookupOffset(int length)
+        {
+            offsetTable = new int[length];
+
+            for (int i = 0; i < offsetTable.Length; i++)
+            {
+                offsetTable[i] = i * 4 + HeaderSize;
+            }
         }
 
         public JilFileReader(BinaryReader reader)
@@ -36,6 +52,29 @@ namespace S4GFXFramework.FileReader
             {
                 offsetTable[i] = reader.ReadInt32();
             }
+        }
+        override public byte[] GetData()
+        {
+            byte[] data = new byte[offsetTable.Length * 4 + HeaderSize];
+
+            using (BinaryWriter writer = new BinaryWriter(new MemoryStream(data)))
+            {
+                writer.Write(GetHeaderData());
+                //magic = startReader.ReadInt32();
+                //flag1 = startReader.ReadInt32();
+                //flag2 = startReader.ReadInt32();
+                //flag3 = startReader.ReadInt32();
+                //flag4 = startReader.ReadInt32();
+
+                writer.Seek(HeaderSize, SeekOrigin.Begin);
+
+                for (int i = 0; i < offsetTable.Length; i++)
+                {
+                    writer.Write(offsetTable[i]);
+                }
+            }
+
+            return data;
         }
     }
 }

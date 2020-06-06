@@ -1,20 +1,33 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.IO;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
 
-namespace S4GFXFramework.GFX
+namespace S4GFXLibrary.GFX
 {
-    public class Palette
+    class Palette
     {
-        uint[] palette;
+        public uint[] palette;
 
         public Palette(int count = 256)
         {
             palette = new uint[count];
         }
 
+        public Palette(Palette copy)
+        {
+            palette = (uint[])copy.palette.Clone();
+        }
+
         public void SetRGB(int index, int r, int g, int b)
         {
             palette[index] = (uint)(r | g << 8 | b << 16 | 255 << 24);
+        }
+        public void SetColor(int index, uint color)
+        {
+            palette[index] = color;
         }
 
         public static uint RGBToPalette(int r, int g, int b)
@@ -75,7 +88,7 @@ namespace S4GFXFramework.GFX
         {
             buffer.BaseStream.Seek(pos, SeekOrigin.Begin);
 
-            for (int i = 0; i < palette.Length; i++)
+            for (int i = pos; i < palette.Length; i++)
             {
                 uint color = GetColor(i);
 

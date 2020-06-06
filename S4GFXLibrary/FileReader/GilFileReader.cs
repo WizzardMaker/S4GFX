@@ -1,8 +1,13 @@
-﻿using System.IO;
+﻿using System;
+using System.Collections.Generic;
+using System.IO;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
 
-namespace S4GFXFramework.FileReader
+namespace S4GFXLibrary.FileReader
 {
-    public class GilFileReader : FileReaderBase
+    class GilFileReader : FileReaderBase
     {
         int[] offsetTable;
 
@@ -49,9 +54,7 @@ namespace S4GFXFramework.FileReader
             }
         }
 
-
-
-        public byte[] GetData()
+        override public byte[] GetData()
         {
             byte[] data = new byte[(int)baseStream.Length];
 

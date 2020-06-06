@@ -1,8 +1,15 @@
-﻿namespace S4GFXFramework.GFX
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+
+namespace S4GFXLibrary.GFX
 {
-    public class ImageData
+    class ImageData
     {
         public byte[] data;
+        List<uint> usedColors;
 
         public int height, width;
 
@@ -10,6 +17,29 @@
         {
             this.height = height;
             this.width = width;
+        }
+
+        public uint[] GetUsedColors(bool forceUpdate = false)
+        {
+            if (usedColors != null && !forceUpdate)
+            {
+                return usedColors.ToArray();
+            }
+
+            usedColors = new List<uint>();
+
+            for (int c = 0; c < data.Length; c += 4)
+            {
+                uint color = Palette.RGBToPalette(data[c], data[c + 1], data[c + 2]);
+
+                if (!usedColors.Contains(color))
+                {
+                    usedColors.Add(color);
+                    usedColors.Sort();
+                }
+            }
+
+            return usedColors.ToArray();
         }
     }
 }

@@ -1,9 +1,13 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.IO;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
 
-namespace S4GFXFramework.FileReader
+namespace S4GFXLibrary.FileReader
 {
-    public class FileReaderBase
+    abstract class FileReaderBase
     {
         int magic;
         int flag1;
@@ -62,5 +66,7 @@ namespace S4GFXFramework.FileReader
 
             return data;
         }
+
+        public abstract byte[] GetData();
     }
 }

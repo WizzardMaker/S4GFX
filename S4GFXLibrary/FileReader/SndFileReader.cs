@@ -5,10 +5,11 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using S4GFX.GFX;
+using S4GFXLibrary.FileReader;
 
 namespace S4GFX.FileReader
 {
-	class SndFileReader : FileReaderBase
+    class SndFileReader : FileReaderBase
 	{
 		byte[][] sounds; // first index is sound ID, second index is byte of sound file (type is wave)
 

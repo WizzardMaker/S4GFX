@@ -1,9 +1,14 @@
-﻿using S4GFXFramework.GFX;
+﻿using S4GFXLibrary.GFX;
+using System;
+using System.Collections.Generic;
 using System.IO;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
 
-namespace S4GFXFramework.FileReader
+namespace S4GFXLibrary.FileReader
 {
-    public class PaletteCollection : FileReaderBase
+    class PaletteCollection : FileReaderBase
     {
         Palette palette;
         PilFileReader pilFile;
@@ -12,6 +17,15 @@ namespace S4GFXFramework.FileReader
         public Palette GetPalette()
         {
             return palette;
+        }
+        public void SetPalette(Palette p)
+        {
+            palette = p;
+        }
+
+        public PilFileReader GetPilFile()
+        {
+            return pilFile;
         }
 
         public int GetOffset(int gfxImageIndex)
@@ -29,6 +43,21 @@ namespace S4GFXFramework.FileReader
             palette = new Palette(((int)pa6File.BaseStream.Length - HeaderSize) / 2);
 
             palette.Read16BitPalette(pa6File, HeaderSize);
+        }
+
+
+        override public byte[] GetData()
+        {
+            byte[] data = new byte[palette.palette.Length * 2 + HeaderSize];
+
+            using (BinaryWriter writer = new BinaryWriter(new MemoryStream(data)))
+            {
+                writer.Write(GetHeaderData());
+
+                palette.Write16BitPalette(writer, HeaderSize);
+            }
+
+            return data;
         }
     }
 }

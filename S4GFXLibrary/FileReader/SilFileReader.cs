@@ -2,7 +2,7 @@
 
 namespace S4GFXLibrary.FileReader
 {
-    class SilFileReader : GilFileReader
+    public class SilFileReader : GilFileReader
     {   // Sil File is basically just handled like a GilFile. ID 0 is NO_SOUND
         public SilFileReader(BinaryReader reader) : base(reader) { }
 

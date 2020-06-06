@@ -3,7 +3,7 @@ using System.IO;
 
 namespace S4GFXLibrary.FileReader
 {
-    abstract class FileReaderBase
+    public abstract class FileReaderBase
     {
         int magic;
         int flag1;

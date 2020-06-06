@@ -3,7 +3,7 @@ using System.IO;
 
 namespace S4GFXLibrary.FileReader
 {
-    class PaletteCollection : FileReaderBase
+    public class PaletteCollection : FileReaderBase
     {
         Palette palette;
         PilFileReader pilFile;

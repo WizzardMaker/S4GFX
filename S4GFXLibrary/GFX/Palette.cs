@@ -3,7 +3,7 @@ using System.IO;
 
 namespace S4GFXLibrary.GFX
 {
-    class Palette
+    public class Palette
     {
         public uint[] palette;
 

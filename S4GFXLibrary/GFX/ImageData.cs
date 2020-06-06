@@ -2,7 +2,7 @@
 
 namespace S4GFXLibrary.GFX
 {
-    class ImageData
+    public class ImageData
     {
         public byte[] data;
         List<uint> usedColors;

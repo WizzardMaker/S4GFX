@@ -4,7 +4,7 @@ using System.IO;
 
 namespace S4GFXLibrary.GFX
 {
-    class GfxImage : IGfxImage
+    public class GfxImage : IGfxImage
     {
         public int DataOffset { get; set; }
         public int Height { get; set; }

@@ -3,7 +3,7 @@ using System.IO;
 
 namespace S4GFXLibrary.FileReader
 {
-    class SndFileReader : FileReaderBase
+    public class SndFileReader : FileReaderBase
     {
         byte[][] sounds; // first index is sound ID, second index is byte of sound file (type is wave)
 

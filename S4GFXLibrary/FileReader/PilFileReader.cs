@@ -7,7 +7,7 @@ namespace S4GFXLibrary.FileReader
     /// <summary>
     /// The offset of each image in a gfx to their palette in the palette file
     /// </summary>
-    class PilFileReader : FileReaderBase
+    public class PilFileReader : FileReaderBase
     {
         int[] offsetTable;
 

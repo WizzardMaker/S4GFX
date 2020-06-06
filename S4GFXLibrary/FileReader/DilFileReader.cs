@@ -2,7 +2,7 @@
 
 namespace S4GFXLibrary.FileReader
 {
-    class DilFileReader : FileReaderBase
+    public class DilFileReader : FileReaderBase
     {
         int[] offsetTable;
 

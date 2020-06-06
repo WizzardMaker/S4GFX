@@ -5,7 +5,7 @@ using System.IO;
 
 namespace S4GFXLibrary.FileReader
 {
-    class GfxFileReader : FileReaderBase
+    public class GfxFileReader : FileReaderBase
     {
         GfxImage[] images;
         bool isWordHeader;

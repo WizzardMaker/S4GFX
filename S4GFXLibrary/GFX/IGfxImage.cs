@@ -1,6 +1,6 @@
 ﻿namespace S4GFXLibrary.GFX
 {
-    interface IGfxImage
+    public interface IGfxImage
     {
         ImageData GetImageData();
         int GetDataSize();

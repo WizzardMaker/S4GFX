@@ -1,12 +1,10 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using S4GFXLibrary.FileReader;
+using S4GFXLibrary.GFX;
+using System;
+using System.Drawing;
 using System.IO;
 using System.Linq;
 using System.Text;
-using System.Threading.Tasks;
-using System.Drawing;
-using S4GFXLibrary.FileReader;
-using S4GFXLibrary.GFX;
 
 namespace S4GFX
 {

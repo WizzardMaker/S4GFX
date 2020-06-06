@@ -1,5 +1,4 @@
-﻿using S4GFXFramework.FileReader;
-using S4GFXFramework.GFX;
+﻿using S4GFXFramework.GFX;
 using System;
 using System.Drawing;
 using System.IO;

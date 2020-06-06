@@ -3,7 +3,7 @@ using System.Drawing;
 using System.Drawing.Imaging;
 using System.Runtime.InteropServices;
 
-namespace S4GFXFramework.GFX
+namespace S4GFXLibrary.GFX
 {
     public class DirectBitmap : IDisposable
     {

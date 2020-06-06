@@ -12,7 +12,7 @@ namespace S4GFX
 {
     class Program
 	{
-		static GhFileReader gfxFile;
+		static GfxFileReader gfxFile;
 		static SndFileReader sndFile;
 
 		static bool removeAlpha, removeShadows;

@@ -3,7 +3,9 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 16
 VisualStudioVersion = 16.0.28729.10
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "S4GFX", "S4GFX.csproj", "{7922D330-A160-49E7-BFFE-94CF6D1FCE01}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "S4GFX", "S4GFX\S4GFX.csproj", "{E84B12EB-4801-4AB2-BA01-DF6235B60B0F}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "S4GFXLibrary", "S4GFXLibrary\S4GFXLibrary.csproj", "{C0E1EF4D-7C29-45B2-8B98-F4A5A2479075}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -11,10 +13,14 @@ Global
 		Release|Any CPU = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
-		{7922D330-A160-49E7-BFFE-94CF6D1FCE01}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{7922D330-A160-49E7-BFFE-94CF6D1FCE01}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{7922D330-A160-49E7-BFFE-94CF6D1FCE01}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{7922D330-A160-49E7-BFFE-94CF6D1FCE01}.Release|Any CPU.Build.0 = Release|Any CPU
+		{E84B12EB-4801-4AB2-BA01-DF6235B60B0F}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{E84B12EB-4801-4AB2-BA01-DF6235B60B0F}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{E84B12EB-4801-4AB2-BA01-DF6235B60B0F}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{E84B12EB-4801-4AB2-BA01-DF6235B60B0F}.Release|Any CPU.Build.0 = Release|Any CPU
+		{C0E1EF4D-7C29-45B2-8B98-F4A5A2479075}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{C0E1EF4D-7C29-45B2-8B98-F4A5A2479075}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{C0E1EF4D-7C29-45B2-8B98-F4A5A2479075}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{C0E1EF4D-7C29-45B2-8B98-F4A5A2479075}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

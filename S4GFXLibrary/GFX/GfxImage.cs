@@ -132,7 +132,7 @@ namespace S4GFXLibrary.GFX
             {
                 data = WriteImageDataWithNoEncoding(newImage.data, pos, length);
             }
-            return data;
+			return data;
         }
 
         private byte[] WriteImageDataWithNoEncoding(byte[] data, int pos, int length)
@@ -236,9 +236,9 @@ namespace S4GFXLibrary.GFX
                     i = offset;
                     dataLength += 1;
                 }
-            }
+			}
 
-            return newData.ToArray();
+			return newData.ToArray();
         }
 
         public ImageData GetImageData()
@@ -310,14 +310,14 @@ namespace S4GFXLibrary.GFX
 
                 writer.Seek(HeaderSize, SeekOrigin.Begin);
 
-                for (int i = DataOffset; i < Width * Height * 4 + DataOffset; i++)
+				for (int i = DataOffset; i < Width * Height * 4 + DataOffset; i++)
                 {
                     if (i >= buffer.Length)
                         break;
 
                     writer.Write(buffer[i]);
                 }
-            }
+			}
 
             return data;
         }

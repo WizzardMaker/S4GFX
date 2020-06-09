@@ -55,7 +55,7 @@ namespace S4GFXLibrary.FileReader
 
                 for (int i = 0; i < offsetTable.Length; i++)
                 {
-                    writer.Write((GetOffset(i) - HeaderSize) * 2 + HeaderSize);
+                    writer.Write((GetOffset(i)));
                 }
             }
 

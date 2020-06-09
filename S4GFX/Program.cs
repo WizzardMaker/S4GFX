@@ -1,6 +1,7 @@
 ﻿using S4GFXLibrary.FileReader;
 using S4GFXLibrary.GFX;
 using System;
+using System.Collections.Generic;
 using System.Drawing;
 using System.IO;
 using System.Linq;
@@ -32,7 +33,7 @@ namespace S4GFX
 			}
 
 			Console.WriteLine("");
-			Console.WriteLine("Export all: (1), Export one group: (2), Export one single image: (3), Import one single image (4)");
+			Console.WriteLine("Export all: (1), Export one group: (2), Export one single image: (3), Import one image collection (4)");
 			Console.WriteLine("");
 
 			string choice = Console.ReadLine();
@@ -100,16 +101,14 @@ namespace S4GFX
 				break;
 				case "4": { //IMPORT
 					Console.WriteLine("=IMPORT=====================================================");
-					Console.WriteLine("To import files, save them to the export/gfx/%GROUP%/ folder.");
-					Console.WriteLine("The file has to be named after the image index that is to be replaced");
+					Console.WriteLine("To import files, save them to the export/gfx/%GROUP%/%id%/ folder.");
+					Console.WriteLine("The image collection has to be complete for the import to work");
 					Console.WriteLine("To see what image has what index, export the group with (1-3) in the main menu.");
-					Console.WriteLine("Example would be: export/gfx/14/2.png -> replaces the woodcutter image of the trojan");
+					Console.WriteLine("Example would be: export/gfx/14/1 -> replaces the woodcutter images of the trojan");
 					Console.WriteLine("");
 					Console.WriteLine("The finished gfx (and, but not neccesary, gil) file will be saved next to this programm.");
 					Console.WriteLine("Replace the original files in the gfx folder with the newly generated ones");
 					Console.WriteLine("============================================================");
-					Console.WriteLine("");
-					Console.WriteLine("Enter 0 to return to the main menu.");
 					Console.WriteLine("");
 
 					REPEAT_SINGLE_GROUP:
@@ -124,7 +123,7 @@ namespace S4GFX
 					Load(path);
 
 					REPEAT_SINGLE_IMAGE:
-					Console.WriteLine($"What number has the image you want to import into the game files? This group contains: {gfxFile.GetImageCount()} images");
+					Console.WriteLine($"What number has the first image in the collection you want to import into the game files? This group contains: {gfxFile.GetImageCount()} images");
 					string choiceImage = Console.ReadLine();
 
 					int image = int.Parse(choiceImage);
@@ -136,8 +135,8 @@ namespace S4GFX
 					//AskRemoveShadowsAndAlpha();
 					//SaveToBitmap(path, image, gfxFile);
 
-					ImageData data = LoadFromBitmap(path, image, gfxFile);
-					gfxFile.ChangeImageData(image, data);
+					ImageData[] data = LoadFromBitmap(path, image, gfxFile);
+					gfxFile.ChangeImageData(choiceGroup, image, data);
 				}
 				break;
 				case "5": { //Secret test key
@@ -328,32 +327,40 @@ namespace S4GFX
 			Console.WriteLine($"Saved: " + path);
 		}
 
-		private static ImageData LoadFromBitmap(string path, int i, GfxFileReader file) {
+		private static ImageData[] LoadFromBitmap(string path, int i, GfxFileReader file) {
 			GfxImage image = file.GetImage(i);
 
-			Bitmap map = new Bitmap($"export/{path}/{i}.png");
+			bool saveByIndex = file.HasDIL;
+			string basePath = $"export/{path}/{(saveByIndex ? $"{image.jobIndex}/" : "")}";
 
-			ImageData data = new ImageData(map.Height, map.Width);
-			image.Width = map.Width;
-			image.Height = map.Height;
+			List<ImageData> imgs = new List<ImageData>();
 
-			data.data = new Byte[map.Height * map.Width * 4];
+			foreach (string filePath in Directory.GetFiles(basePath)) {
+				Bitmap map = new Bitmap(filePath);
 
-			int index = 0;
-			for (int y = 0; y < map.Height; y++) {
-				for (int x = 0; x < map.Width; x++) {
-					Color c = map.GetPixel(x, y);
+				ImageData data = new ImageData(map.Height, map.Width);
+				image.Width = map.Width;
+				image.Height = map.Height;
 
-					data.data[index + 0] = c.R;
-					data.data[index + 1] = c.G;
-					data.data[index + 2] = c.B;
-					data.data[index + 3] = 255;
+				data.data = new Byte[map.Height * map.Width * 4];
 
-					index += 4;
+				int index = 0;
+				for (int y = 0; y < map.Height; y++) {
+					for (int x = 0; x < map.Width; x++) {
+						Color c = map.GetPixel(x, y);
+
+						data.data[index + 0] = c.R;
+						data.data[index + 1] = c.G;
+						data.data[index + 2] = c.B;
+						data.data[index + 3] = 255;
+
+						index += 4;
+					}
 				}
-			}
 
-			return data;
+				imgs.Add(data);
+			}
+			return imgs.ToArray();
 		}
 
 		private static void SaveToBitmap(string path, int i, GfxFileReader file) {

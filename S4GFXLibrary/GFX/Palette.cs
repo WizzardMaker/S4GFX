@@ -38,7 +38,7 @@ namespace S4GFXLibrary.GFX
 
         public int GetIndex(int offset, uint color)
         {
-            return Array.IndexOf(palette, color, Math.Max(2, offset));
+            return Array.IndexOf(palette, color, Math.Max(2, offset),256);
         }
 
         public int Read3BytePalette(byte[] buffer, int pos)
@@ -84,7 +84,7 @@ namespace S4GFXLibrary.GFX
         {
             buffer.BaseStream.Seek(pos, SeekOrigin.Begin);
 
-            for (int i = pos; i < palette.Length; i++)
+            for (int i = 0; i < palette.Length; i++)
             {
                 uint color = GetColor(i);
 

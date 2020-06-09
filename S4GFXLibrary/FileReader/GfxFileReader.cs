@@ -15,6 +15,8 @@ namespace S4GFXLibrary.FileReader
         DilFileReader directionIndexList;
         PaletteCollection paletteCollection;
 
+		public bool HasDIL => directionIndexList != null;
+
         public int GetImageCount()
         {
             return images != null ? images.Length : 0;
@@ -109,7 +111,6 @@ namespace S4GFXLibrary.FileReader
             int count = offsetTable.GetImageCount();
             images = new GfxImage[count];
 
-            int lastGood = 0;
             for (int i = 0; i < count; i++)
             {
                 int gfxOffset = offsetTable.GetImageOffset(i);

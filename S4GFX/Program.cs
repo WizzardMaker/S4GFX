@@ -13,7 +13,7 @@ namespace S4GFX
 		static GfxFileReader gfxFile;
 		static SndFileReader sndFile;
 
-		static bool removeAlpha, removeShadows;
+		static bool removeAlpha, removeShadows, onlyShadows;
 
 		static void Main(string[] args) {
 			Console.WriteLine("=Settler IV image exporter/importer=========================");
@@ -189,7 +189,7 @@ namespace S4GFX
 			Console.WriteLine("We can remove both colors in this step");
 			Console.WriteLine("=================");
 			Console.WriteLine("");
-			Console.WriteLine("Remove nothing (1), only transparency/Red (2), shadows/green (3) or both (4)?");
+			Console.WriteLine("Remove nothing (1), only transparency/Red (2), shadows/green (3) or both (4)? Save only shadows (5)");
 			Console.WriteLine("");
 
 			string choice = Console.ReadLine();
@@ -202,6 +202,9 @@ namespace S4GFX
 				break;
 				case "4":
 				removeAlpha = removeShadows = true;
+				break;
+				case "5":
+				onlyShadows = true;
 				break;
 			}
 		}
@@ -354,6 +357,8 @@ namespace S4GFX
 		}
 
 		private static void SaveToBitmap(string path, int i, GfxFileReader file) {
+			bool saveByIndex = file.HasDIL;
+
 			GfxImage image = file.GetImage(i);
 			int width = image.Width;
 			int height = image.Height;
@@ -373,6 +378,11 @@ namespace S4GFX
 						}
 						if (green == 255 && red + blue == 0) {
 							alpha = removeShadows ? 0 : alpha;
+						}else if (onlyShadows) {
+							red = 0;
+							green = 0;
+							blue = 0;
+							alpha = 0;
 						}
 
 						b.SetPixel(x, y, Color.FromArgb(alpha, red, green, blue));
@@ -381,10 +391,9 @@ namespace S4GFX
 					}
 				}
 
-				Directory.CreateDirectory("export/"+path);
-				b.Bitmap.Save($"export/{path}/{i}.png", System.Drawing.Imaging.ImageFormat.Png);
-				//if( i % 50 == 0)
-					//Console.WriteLine($"Saved {i}/{gfxFile.GetImageCount()}");
+				string basePath = $"export/{path}/{(saveByIndex ? $"{image.jobIndex}/" : "")}";
+				Directory.CreateDirectory(basePath);
+				b.Bitmap.Save(basePath + $"{i}.png", System.Drawing.Imaging.ImageFormat.Png);
 			}
 		}
 	}

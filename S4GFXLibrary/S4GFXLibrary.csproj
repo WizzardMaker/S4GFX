@@ -47,6 +47,7 @@
     <Compile Include="FileReader\GfxFileReader.cs" />
     <Compile Include="FileReader\GhFileReader.cs" />
     <Compile Include="FileReader\GilFileReader.cs" />
+    <Compile Include="FileReader\ICollectionFileReader.cs" />
     <Compile Include="FileReader\JilFileReader.cs" />
     <Compile Include="FileReader\PaletteCollection.cs" />
     <Compile Include="FileReader\PilFileReader.cs" />
@@ -54,6 +55,8 @@
     <Compile Include="FileReader\SndFileReader.cs" />
     <Compile Include="GFX\DirectBitmap.cs" />
     <Compile Include="GFX\GfxImage.cs" />
+    <Compile Include="GFX\GfxImage16Bit.cs" />
+    <Compile Include="GFX\GfxImageWithPalette.cs" />
     <Compile Include="GFX\IGfxImage.cs" />
     <Compile Include="GFX\ImageData.cs" />
     <Compile Include="GFX\Palette.cs" />

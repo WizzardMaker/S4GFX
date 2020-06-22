@@ -11,7 +11,7 @@ namespace S4GFX
 {
     class Program
 	{
-		static GfxFileReader gfxFile;
+		static ICollectionFileReader gfxFile;
 		static SndFileReader sndFile;
 
 		static bool removeAlpha, removeShadows, onlyShadows;
@@ -62,8 +62,8 @@ namespace S4GFX
 					string choiceGroup = Console.ReadLine();
 
 					string path = "GFX/" + choiceGroup;
-					if (!File.Exists(path + ".gfx")) {
-							Console.WriteLine($"Group {path} does not exist!");
+					if (File.Exists(path + ".gfx") == false && File.Exists(path + ".gh5") == false) {
+						Console.WriteLine($"Group {path} does not exist!");
 							goto REPEAT;
 					}
 
@@ -79,7 +79,7 @@ namespace S4GFX
 					string choiceGroup = Console.ReadLine();
 
 					string path = "GFX/" + choiceGroup;
-					if (!File.Exists(path + ".gfx")) {
+					if (File.Exists(path + ".gfx") == false && File.Exists(path + ".gh5") == false) {
 						Console.WriteLine($"Group {path} does not exist!");
 						goto REPEAT_SINGLE_GROUP;
 					}
@@ -116,7 +116,7 @@ namespace S4GFX
 					string choiceGroup = Console.ReadLine();
 
 					string path = "GFX/" + choiceGroup;
-					if (!File.Exists(path + ".gfx")) {
+					if (File.Exists(path + ".gfx") == false && File.Exists(path + ".gh5") == false) {
 						Console.WriteLine($"Group {path} does not exist!");
 						goto REPEAT_SINGLE_GROUP;
 					}
@@ -139,34 +139,34 @@ namespace S4GFX
 					gfxFile.ChangeImageData(choiceGroup, image, data);
 				}
 				break;
-				case "5": { //Secret test key
-					REPEAT_SINGLE_GROUP:
-					Console.WriteLine("What group would you like to export an image from?");
-					string choiceGroup = Console.ReadLine();
+				//case "5": { //Secret test key
+				//	REPEAT_SINGLE_GROUP:
+				//	Console.WriteLine("What group would you like to export an image from?");
+				//	string choiceGroup = Console.ReadLine();
 
-					string path = "GFX/" + choiceGroup;
-					if (!File.Exists(path + ".gfx")) {
-						Console.WriteLine($"Group {path} does not exist!");
-						goto REPEAT_SINGLE_GROUP;
-					}
-					Load(path);
+				//	string path = "GFX/" + choiceGroup;
+				//	if (!File.Exists(path + ".gfx")) {
+				//		Console.WriteLine($"Group {path} does not exist!");
+				//		goto REPEAT_SINGLE_GROUP;
+				//	}
+				//	Load(path);
 
-					gfxFile.RemoveDILDependence();
+				//	(gfxFile ).RemoveDILDependence();
 
-					REPEAT_SINGLE_IMAGE:
-					Console.WriteLine($"What number has the image you want to export? This group contains: {gfxFile.GetImageCount()} images");
-					string choiceImage = Console.ReadLine();
+				//	REPEAT_SINGLE_IMAGE:
+				//	Console.WriteLine($"What number has the image you want to export? This group contains: {gfxFile.GetImageCount()} images");
+				//	string choiceImage = Console.ReadLine();
 
-					int image = int.Parse(choiceImage);
-					if (image > gfxFile.GetImageCount()) {
-						Console.WriteLine($"There is no image nr. {image}!");
-						goto REPEAT_SINGLE_IMAGE;
-					}
+				//	int image = int.Parse(choiceImage);
+				//	if (image > gfxFile.GetImageCount()) {
+				//		Console.WriteLine($"There is no image nr. {image}!");
+				//		goto REPEAT_SINGLE_IMAGE;
+				//	}
 
-					AskRemoveShadowsAndAlpha();
-					SaveToBitmap(path, image, gfxFile);
-				}
-				break;
+				//	AskRemoveShadowsAndAlpha();
+				//	SaveToBitmap(path, image, gfxFile);
+				//}
+				//break;
 			}
 
 			Console.WriteLine("");
@@ -232,12 +232,18 @@ namespace S4GFX
 			return sndFile;
 		}
 
-		static public GfxFileReader Load(string fileId) {
+		static public ICollectionFileReader Load(string fileId) {
 
 			bool gfx = File.Exists(fileId + ".gfx");
-			if(gfx == false) {
-				return null;
+			bool gh = File.Exists(fileId + ".gh6");
+
+			if (gh) {
+				return DoLoadGH(fileId);
 			}
+
+			if (gfx == false) {
+				return null;
+			} 
 
 			bool pil = File.Exists(fileId + ".pil");
 			bool jil = File.Exists(fileId + ".jil");
@@ -246,7 +252,19 @@ namespace S4GFX
 			return DoLoad(fileId, pil, jil);
 		}
 
-		static public GfxFileReader DoLoad(string fileId, bool usePli, bool useJil) {
+		static public ICollectionFileReader DoLoadGH(string fileId) {
+			var gh = new BinaryReader(File.Open(fileId + ".gh5", FileMode.Open), Encoding.Default, true);
+			//var gl = new BinaryReader(File.Open(fileId + ".gl5", FileMode.Open), Encoding.Default, true);
+
+			gfxFile = new GhFileReader(gh);
+
+			gh.Close();
+			//gl.Close();
+
+			return gfxFile;
+		}
+
+		static public ICollectionFileReader DoLoad(string fileId, bool usePli, bool useJil) {
 			//Console.WriteLine($"Using .jil={useJil}");
 
 			var gfx = new BinaryReader(File.Open(fileId + ".gfx", FileMode.Open),Encoding.Default, true);
@@ -310,7 +328,7 @@ namespace S4GFX
 			Console.WriteLine($"Saved: " + path);
 		}
 
-		private static void SaveAllBitmaps(string path, GfxFileReader file = null) {
+		private static void SaveAllBitmaps(string path, ICollectionFileReader file = null) {
 			Console.WriteLine($"Start saving: " + path);
 			//Parallel.For(0, gfxFile.GetImageCount(), (i) => { SaveToBitmap(path, i); });
 			file = file ?? gfxFile;
@@ -327,11 +345,13 @@ namespace S4GFX
 			Console.WriteLine($"Saved: " + path);
 		}
 
-		private static ImageData[] LoadFromBitmap(string path, int i, GfxFileReader file) {
-			GfxImage image = file.GetImage(i);
+		private static ImageData[] LoadFromBitmap(string path, int i, ICollectionFileReader file) {
+			IGfxImage image = file.GetImage(i);
 
 			bool saveByIndex = file.HasDIL;
-			string basePath = $"export/{path}/{(saveByIndex ? $"{image.jobIndex}/" : "")}";
+			int jobIndex = saveByIndex ? (image as GfxImage).jobIndex : 0;
+
+			string basePath = $"export/{path}/{(saveByIndex ? $"{jobIndex}/" : "")}";
 
 			List<ImageData> imgs = new List<ImageData>();
 
@@ -363,10 +383,10 @@ namespace S4GFX
 			return imgs.ToArray();
 		}
 
-		private static void SaveToBitmap(string path, int i, GfxFileReader file) {
+		private static void SaveToBitmap(string path, int i, ICollectionFileReader file) {
 			bool saveByIndex = file.HasDIL;
 
-			GfxImage image = file.GetImage(i);
+			IGfxImage image = file.GetImage(i);
 			int width = image.Width;
 			int height = image.Height;
 			using (DirectBitmap b = new DirectBitmap(image.Width, image.Height)) {
@@ -376,6 +396,10 @@ namespace S4GFX
 				for (int y = 0; y < height; y++) {
 					for (int x = 0; x < width; x++) {
 						int alpha = 255;
+
+						if (index >= data.data.Length)
+							break;
+
 						byte red = data.data[index + 0];
 						byte green = data.data[index + 1];
 						byte blue = data.data[index + 2];
@@ -398,7 +422,9 @@ namespace S4GFX
 					}
 				}
 
-				string basePath = $"export/{path}/{(saveByIndex ? $"{image.jobIndex}/" : "")}";
+				int jobIndex = saveByIndex ? (image as GfxImage).jobIndex : 0;
+
+				string basePath = $"export/{path}/{(saveByIndex ? $"{jobIndex}/" : "")}";
 				Directory.CreateDirectory(basePath);
 				b.Bitmap.Save(basePath + $"{i}.png", System.Drawing.Imaging.ImageFormat.Png);
 			}

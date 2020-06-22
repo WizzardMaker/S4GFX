@@ -243,7 +243,7 @@ namespace S4GFXLibrary.GFX
 
         public ImageData GetImageData()
         {
-            ImageData img = new ImageData(Width, Height);
+            ImageData img = new ImageData(Height, Width);
 
             int length = Width * Height * 4;
             int pos = DataOffset;

@@ -108,13 +108,14 @@ namespace S4GFXLibrary.FileReader
 			//ChangeImageData(2, images[2].GetImageData());
 		}
 
-		public int GetPaletteOffsetIndex(int imageIndex) {
-			int lastGood = 0;
+
+		int lastGoodIndex, lastGoodJob;
+		public int GetPaletteOffsetIndex(int imageIndex, bool useLastGood = true) {
+			int lastGood = useLastGood ? lastGoodJob : 0;
 			int jobIndex = 0;
 
-			Console.WriteLine($"JIL Search for:{imageIndex}");
-
-			for (int i = 0; i <= imageIndex; i++) {
+			int start = useLastGood ? lastGoodIndex : 0;
+			for (int i = start; i <= imageIndex; i++) {
 				int gfxOffset = offsetTable.GetImageOffset(i);
 
 				jobIndex = i;
@@ -128,6 +129,9 @@ namespace S4GFXLibrary.FileReader
 				}
 			}
 
+			Console.WriteLine($"JIL Search for:{imageIndex}, got: {jobIndex}");
+			lastGoodIndex = imageIndex;
+			lastGoodJob = jobIndex;
 			return jobIndex;
 		}
 
@@ -140,7 +144,7 @@ namespace S4GFXLibrary.FileReader
 			List<int> imgs = new List<int>();
 
 			for (int i = 0; i < images.Length; i++) {
-				if (GetPaletteOffsetIndex(i) == jil) {
+				if (GetPaletteOffsetIndex(i, false) == jil) {
 					imgs.Add(i);
 				}
 			}

@@ -47,6 +47,7 @@ Here is an example path for the torjan's lumberjack building: `export\GFX\14\1\2
 ## Authors
 * **Wizzard Maker - Jonas Schoenwald** - *Main author/contributer* - [WizzardMaker](https://github.com/WizzardMaker/)
 * **XanatosX** - *Interface and library work* - [XanatosX](https://github.com/XanatosX/)
+* **nyfrk** - *Sound export* - [nyfrk](https://github.com/nyfrk)
 ## License
 
 This project is licensed under the GPL-3.0 License - see the [LICENSE.md](LICENSE.MD) file for details

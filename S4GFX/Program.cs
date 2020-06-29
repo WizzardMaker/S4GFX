@@ -354,11 +354,15 @@ namespace S4GFX
 			string basePath = $"export/{path}/{(saveByIndex ? $"{jobIndex}/" : "")}";
 
 			List<ImageData> imgs = new List<ImageData>();
-
-			foreach (string filePath in Directory.GetFiles(basePath)) {
+			var files = Directory.GetFiles(basePath, "*.*");
+			int maxlen = files.Max(x => x.Length);
+			var result = files.OrderBy(x => x.PadLeft(maxlen, '0')).ToList();
+			
+			foreach (string filePath in result) {
 				Bitmap map = new Bitmap(filePath);
 
 				ImageData data = new ImageData(map.Height, map.Width);
+
 				image.Width = map.Width;
 				image.Height = map.Height;
 

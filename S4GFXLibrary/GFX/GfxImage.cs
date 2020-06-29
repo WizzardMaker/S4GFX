@@ -25,7 +25,7 @@ namespace S4GFXLibrary.GFX
         public Palette palette;
         public int paletteOffset;
 
-        int HeaderSize => headType ? 8 : 12;
+        public int HeaderSize => headType ? 8 : 12;
 
         int[] usedPaletteEntries;
 
@@ -219,8 +219,17 @@ namespace S4GFXLibrary.GFX
                 else
                 {
                     value = palette.GetIndex(paletteOffset, Palette.RGBToPalette(red, green, blue));
+					if(value == -1) {
+						Console.WriteLine("Invalid color - not found in the palette!");
+					}
+
                     value = value - paletteOffset;
-                    value = Math.Max((byte)2, (byte)value);
+
+					if (value >= 252) {
+						Console.WriteLine("Invalid color - not found in the palette!");
+					}
+
+					value = Math.Max((byte)2, (byte)value);
                 }
                 int count = 1;
 
@@ -302,7 +311,8 @@ namespace S4GFXLibrary.GFX
 
         public byte[] GetData()
         {
-            byte[] data = new byte[Width * Height * 4 + HeaderSize];
+			int length = Width * Height * 4;
+			byte[] data = new byte[length + HeaderSize];
 
             using (BinaryWriter writer = new BinaryWriter(new MemoryStream(data)))
             {
@@ -310,7 +320,7 @@ namespace S4GFXLibrary.GFX
 
                 writer.Seek(HeaderSize, SeekOrigin.Begin);
 
-				for (int i = DataOffset; i < Width * Height * 4 + DataOffset; i++)
+				for (int i = DataOffset; i < length + DataOffset; i++)
                 {
                     if (i >= buffer.Length)
                         break;

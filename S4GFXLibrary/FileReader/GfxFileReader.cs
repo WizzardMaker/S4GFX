@@ -51,7 +51,7 @@ namespace S4GFXLibrary.FileReader
 				i.buffer = i.CreateImageData(newDatas[j]);
 
 				int nextImageStartOffset = offsetTable.GetImageOffset(index + j + 1); //Get the current offset of the next image
-				int offset = Math.Max(0, i.DataOffset + i.buffer.Length - nextImageStartOffset - 1); //Our data could be larger, calculate how much larger
+				int offset = Math.Max(0, offsetTable.GetImageOffset(index + j)+i.HeaderSize + i.buffer.Length - nextImageStartOffset - 1); //Our data could be larger, calculate how much larger
 
 				if (offset != 0) { //We want to move all images that follow our changed image, if our new image is bigger
 					offsetTable.AddOffsetToFollowing(index + j + 1, offset);
@@ -201,10 +201,12 @@ namespace S4GFXLibrary.FileReader
 			Palette p = paletteCollection.GetPalette();
 
 			if (additionOffset == 0) {
-				for (int i = 2; i < 256; i++) {
+				for (int i = 0; i < 256; i++) {
 					p.SetColor(paletteOffset + i, 9999);
 				}
+				additionOffset = 1;
 			}
+
 
 			List<uint> colorsToBeChecked = new List<uint>(orig.GetUsedColors());
 			List<uint> colorsToBeAdded = new List<uint>();

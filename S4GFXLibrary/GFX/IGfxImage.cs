@@ -13,6 +13,9 @@
         int Flag1 { get; set; }
         int Flag2 { get; set; }
 
-        byte[] GetData();
+		int Index { get; set; }
+		int GroupIndex { get; set; }
+
+		byte[] GetData();
     }
 }

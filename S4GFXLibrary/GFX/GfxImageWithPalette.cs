@@ -14,6 +14,10 @@ namespace S4GFXLibrary.GFX
 		public int Flag1 { get; set; }
 		public int Flag2 { get; set; }
 
+		public int Index { get; set; }
+
+		public int GroupIndex { get; set; }
+
 		public int rowCount;
 		public byte[] buffer;
 

@@ -40,7 +40,7 @@ namespace S4GFXLibrary.FileReader {
 
 			int filePos = HeaderSize;
 			int size = -1;
-
+			int index = 0;
 			while(size != 0) {
 				reader.BaseStream.Seek(filePos, SeekOrigin.Begin);
 
@@ -71,9 +71,13 @@ namespace S4GFXLibrary.FileReader {
 				img.Flag1 = flag2;
 				img.DataOffset = filePos + 8;
 
+				img.Index = index;
+				img.GroupIndex = index;
+
 				images.Add(img);
 
 				filePos += size + 8;
+				index++;
 			}
 		}
 	}

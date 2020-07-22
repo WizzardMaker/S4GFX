@@ -103,6 +103,8 @@ namespace S4GFXLibrary.FileReader
 
 				images[i] = ReadImage(reader, gfxOffset, paletteCollection.GetPalette(), paletteCollection.GetOffset(jobIndex), buffer);
 				images[i].jobIndex = jobIndex;
+				images[i].Index = i;
+				images[i].GroupIndex = jobIndex;
 			}
 
 			//ChangeImageData(2, images[2].GetImageData());

@@ -27,7 +27,11 @@ namespace S4GFXLibrary.GFX
 
         public int HeaderSize => headType ? 8 : 12;
 
-        int[] usedPaletteEntries;
+		public int Index { get; set; }
+
+		public int GroupIndex { get; set; }
+
+		int[] usedPaletteEntries;
 
         public int[] GetUsedPaletteEntries()
         {
@@ -87,7 +91,12 @@ namespace S4GFXLibrary.GFX
                 else
                 {
                     color = palette.GetColor(paletteOffset + value);
-                }
+					//if (value > 200) {
+					//	color = Palette.RGBToPalette(0, 0, value, value);
+					//} else {
+					//	color = Palette.RGBToPalette(255, 0, 0);
+					//}
+				}
 
                 for (int i = 0; i < count && j < length; i++)
                 {

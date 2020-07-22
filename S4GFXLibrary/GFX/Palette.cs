@@ -26,9 +26,9 @@ namespace S4GFXLibrary.GFX
             palette[index] = color;
         }
 
-        public static uint RGBToPalette(int r, int g, int b)
+        public static uint RGBToPalette(int r, int g, int b, int a = 255)
         {
-            return (uint)(r | g << 8 | b << 16 | 255 << 24);
+            return (uint)(r | g << 8 | b << 16 | a << 24);
         }
 
         public uint GetColor(int index)

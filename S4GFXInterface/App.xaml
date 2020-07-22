@@ -1,0 +1,13 @@
+﻿<Application x:Class="S4GFXInterface.App"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:local="clr-namespace:S4GFXInterface"
+             StartupUri="PathSplashscreen.xaml">
+    <Application.Resources>
+		<SolidColorBrush x:Key="HeaderHighlightColor" Color="{DynamicResource {x:Static SystemColors.HighlightColorKey}}"></SolidColorBrush>
+		<SolidColorBrush x:Key="HeaderStandardColor" Color="{DynamicResource {x:Static SystemColors.ActiveBorderColorKey}}"></SolidColorBrush>
+		
+		<SolidColorBrush x:Key="HeaderHighlightBackColor" Color="White"></SolidColorBrush>
+		<SolidColorBrush x:Key="HeaderStandardBackColor" Color="{DynamicResource {x:Static SystemColors.ControlColorKey}}"></SolidColorBrush>
+	</Application.Resources>
+</Application>

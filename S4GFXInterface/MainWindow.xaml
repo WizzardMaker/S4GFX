@@ -1,0 +1,68 @@
+﻿<Window x:Class="S4GFXInterface.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:S4GFXInterface"
+		xmlns:gr="clr-namespace:WpfAutoGrid"
+        xmlns:uc="clr-namespace:S4GFXInterface.Controls"
+		xmlns:wpfautogrid="clr-namespace:WpfAutoGrid;assembly=WpfAutoGrid"
+		mc:Ignorable="d"
+        Title="S4GFX" Height="600" Width="1066.667" ResizeMode="CanMinimize" WindowStartupLocation="CenterScreen" BorderBrush="{DynamicResource {x:Static SystemColors.ControlDarkBrushKey}}">
+	<Grid>
+		<DockPanel HorizontalAlignment="Left" Height="70" VerticalAlignment="Top" Width="1062" LastChildFill="False" Margin="-1 0 0 0">
+			<DockPanel.Background>
+				<SolidColorBrush Color="{DynamicResource {x:Static SystemColors.ControlLightColorKey}}"/>
+			</DockPanel.Background>
+			<uc:HeaderButton x:Name="ExportB" Heading="Export" ImageSource="/Resources/Icons/icons8-exportieren-100.png"/>
+
+			<uc:HeaderButton x:Name="ImportB" Heading="Import" ImageSource="/Resources/Icons/icons8-importieren-100.png"/>
+
+			<uc:HeaderButton x:Name="SettingsB" Heading="Settings" ImageSource="/Resources/Icons/icons8-einstellungen-100.png"/>
+
+		</DockPanel>
+
+		<TabControl x:Name="MainControl" HorizontalAlignment="Left" Height="501" VerticalAlignment="Top" Width="1061" BorderBrush="White" Margin="0,70,0,0" Padding="-1 -1 0 7">
+			<TabItem x:Name="Export" Header="Export" Margin="-2,-2,-2,0">
+				<DockPanel Margin="0,0,10,0" LastChildFill="False" ScrollViewer.VerticalScrollBarVisibility="Disabled">
+					<Grid Width="328" Margin="0,0,0,23">
+						<ComboBox x:Name="ExportGroupIDs" HorizontalAlignment="Left" VerticalAlignment="Top" Width="96" Margin="81,10,0,0" SelectionChanged="ExportGroupIDs_SelectionChanged"/>
+						<Label Content="Group ID:" HorizontalAlignment="Left" Margin="10,6,0,0" VerticalAlignment="Top" Width="66"/>
+					</Grid>
+					<StatusBar HorizontalContentAlignment="Center" VerticalContentAlignment="Center" DockPanel.Dock="Bottom" BorderThickness="0 1 0 0" BorderBrush="{DynamicResource {x:Static SystemColors.ControlDarkBrushKey}}" Margin="-328,0,0,0">
+						<StatusBarItem>
+							<TextBlock x:Name="ExportLoadCount" Text="Hello!"/>
+						</StatusBarItem>
+					</StatusBar>
+					<ScrollViewer DockPanel.Dock="Right" HorizontalContentAlignment="Stretch" Width="710" BorderThickness="50" Margin="0,-2,0,0" >
+						<ScrollViewer.BorderBrush>
+							<SolidColorBrush Color="Black"/>
+						</ScrollViewer.BorderBrush>
+						<wpfautogrid:AutoGrid x:Name="ExportGrid" ColumnCount="4" RowCount="100"/>
+					</ScrollViewer>
+				</DockPanel>
+			</TabItem>
+			<TabItem x:Name="Import" Header="Import">
+				<DockPanel LastChildFill="False" Margin="0,0,0,0">
+					<StatusBar HorizontalContentAlignment="Center" VerticalContentAlignment="Center" DockPanel.Dock="Bottom" BorderThickness="0 1 0 0" BorderBrush="{DynamicResource {x:Static SystemColors.ControlDarkBrushKey}}" d:IsHidden="True">
+						<StatusBarItem>
+							<TextBlock x:Name="lblCursorPosition1" Text="Hello!"/>
+						</StatusBarItem>
+					</StatusBar>
+				</DockPanel>
+			</TabItem>
+			<TabItem x:Name="Settings" Header="Settings">
+				<Grid Margin="0,0,0,0">
+					<Label Content="Current Settler IV Path:" HorizontalAlignment="Left" Margin="10,10,0,0" VerticalAlignment="Top"/>
+					<Border BorderBrush="Black" BorderThickness="1" HorizontalAlignment="Left" Height="27" Margin="10,31,0,0" VerticalAlignment="Top" Width="393">
+						<Grid HorizontalAlignment="Left" Height="26" Margin="0,0,0,-1" VerticalAlignment="Top" Width="382">
+							<TextBlock x:Name="SettlerPath" HorizontalAlignment="Left" TextWrapping="NoWrap" TextTrimming="CharacterEllipsis" Text="{Binding PathAddress}" VerticalAlignment="Top" Width="297" Margin="5,4,0,0"/>
+							<Button x:Name="ChangePath" Content="Change..." HorizontalAlignment="Left" Margin="307,2,0,0" VerticalAlignment="Top" Width="75" Click="ChangePath_Click"/>
+						</Grid>
+					</Border>
+				</Grid>
+			</TabItem>
+		</TabControl>
+
+	</Grid>
+</Window>

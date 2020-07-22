@@ -7,6 +7,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "S4GFX", "S4GFX\S4GFX.csproj
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "S4GFXLibrary", "S4GFXLibrary\S4GFXLibrary.csproj", "{C0E1EF4D-7C29-45B2-8B98-F4A5A2479075}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "S4GFXInterface", "S4GFXInterface\S4GFXInterface.csproj", "{FA047C82-EE1D-4127-B9CE-BAD7EDCC99CD}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -21,6 +23,10 @@ Global
 		{C0E1EF4D-7C29-45B2-8B98-F4A5A2479075}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{C0E1EF4D-7C29-45B2-8B98-F4A5A2479075}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{C0E1EF4D-7C29-45B2-8B98-F4A5A2479075}.Release|Any CPU.Build.0 = Release|Any CPU
+		{FA047C82-EE1D-4127-B9CE-BAD7EDCC99CD}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{FA047C82-EE1D-4127-B9CE-BAD7EDCC99CD}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{FA047C82-EE1D-4127-B9CE-BAD7EDCC99CD}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{FA047C82-EE1D-4127-B9CE-BAD7EDCC99CD}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

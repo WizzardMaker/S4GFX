@@ -26,15 +26,40 @@
 			<TabItem x:Name="Export" Header="Export" Margin="-2,-2,-2,0">
 				<DockPanel Margin="0,0,10,0" LastChildFill="False" ScrollViewer.VerticalScrollBarVisibility="Disabled">
 					<Grid Width="328" Margin="0,0,0,23">
-						<ComboBox x:Name="ExportGroupIDs" HorizontalAlignment="Left" VerticalAlignment="Top" Width="96" Margin="81,10,0,0" SelectionChanged="ExportGroupIDs_SelectionChanged"/>
-						<Label Content="Group ID:" HorizontalAlignment="Left" Margin="10,6,0,0" VerticalAlignment="Top" Width="66"/>
+						<Button x:Name="ReturnToGroupBut" HorizontalAlignment="Left" VerticalAlignment="Top" Width="117" Margin="201,10,0,0" Height="22" Click="ReturnToGroupBut_Click">
+							<StackPanel Height="18" Width="133" Orientation="Horizontal">
+								<Image Source="Resources/Icons/icons8-zurück-96.png" Width="23" Margin="0"/>
+								<TextBlock TextWrapping="Wrap" Text="Return to group" Margin="0" Width="101"/>
+							</StackPanel>
+						</Button>
+						<ComboBox x:Name="ExportGroupIDs" HorizontalAlignment="Left" VerticalAlignment="Top" Width="96" Margin="76,10,0,0" SelectionChanged="ExportGroupIDs_SelectionChanged"/>
+						<Label HorizontalAlignment="Left" Margin="10,6,0,0" VerticalAlignment="Top" Width="66">
+							<TextBlock HorizontalAlignment="Left" TextWrapping="Wrap" Text="Group ID:" VerticalAlignment="Top"/>
+						</Label>
 					</Grid>
 					<StatusBar HorizontalContentAlignment="Center" VerticalContentAlignment="Center" DockPanel.Dock="Bottom" BorderThickness="0 1 0 0" BorderBrush="{DynamicResource {x:Static SystemColors.ControlDarkBrushKey}}" Margin="-328,0,0,0">
 						<StatusBarItem>
 							<TextBlock x:Name="ExportLoadCount" Text="Hello!"/>
 						</StatusBarItem>
+						<StatusBarItem>
+							<Image x:Name="LoadingIcon" Source="Resources/Icons/icons8-ladeanimation-bild-1-50.png" Height="22" Width="22">
+								<Image.Triggers>
+									<EventTrigger RoutedEvent="Window.Loaded">
+										<BeginStoryboard>
+											<Storyboard >
+												<DoubleAnimation Name="loadingAnim" Storyboard.TargetName="LoadingIcon" 
+
+												   Storyboard.TargetProperty="Width" From="22" To="22" 
+
+												   Duration="0:0:0.05" Completed="LoadingAnim_Completed"/>
+											</Storyboard>
+										</BeginStoryboard>
+									</EventTrigger>
+								</Image.Triggers>
+							</Image>
+						</StatusBarItem>
 					</StatusBar>
-					<ScrollViewer DockPanel.Dock="Right" HorizontalContentAlignment="Stretch" Width="710" BorderThickness="50" Margin="0,-2,0,0" >
+					<ScrollViewer x:Name="ExportScrollView" DockPanel.Dock="Right" HorizontalContentAlignment="Stretch" Width="710" BorderThickness="50" Margin="0,-2,0,0" >
 						<ScrollViewer.BorderBrush>
 							<SolidColorBrush Color="Black"/>
 						</ScrollViewer.BorderBrush>

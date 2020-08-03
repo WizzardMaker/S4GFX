@@ -137,6 +137,8 @@ namespace S4GFX
 
 					ImageData[] data = LoadFromBitmap(path, image, gfxFile);
 					gfxFile.ChangeImageData(choiceGroup, image, data);
+					var collection = gfxFile.GetDataBufferCollection(choiceGroup);
+					collection.WriteToFiles("");
 				}
 				break;
 				//case "5": { //Secret test key

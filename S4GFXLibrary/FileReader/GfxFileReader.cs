@@ -29,6 +29,14 @@ namespace S4GFXLibrary.FileReader
 			return images[index];
 		}
 
+
+		/// <summary>
+		/// Changes the images starting from index.
+		/// </summary>
+		/// <param name="groupID"></param>
+		/// <param name="index"></param>
+		/// <param name="newDatas"></param>
+		/// <returns></returns>
 		public void ChangeImageData(string groupID, int index, ImageData[] newDatas) {
 			if (newDatas[0].GetUsedColors().Length > 255) {
 				throw new Exception("Imported images cannot have more than 255 colors!");
@@ -51,7 +59,7 @@ namespace S4GFXLibrary.FileReader
 				i.buffer = i.CreateImageData(newDatas[j]);
 
 				int nextImageStartOffset = offsetTable.GetImageOffset(index + j + 1); //Get the current offset of the next image
-				int offset = Math.Max(0, offsetTable.GetImageOffset(index + j)+i.HeaderSize + i.buffer.Length - nextImageStartOffset - 1); //Our data could be larger, calculate how much larger
+				int offset = Math.Max(0, offsetTable.GetImageOffset(index + j) + i.HeaderSize + i.buffer.Length - nextImageStartOffset - 1); //Our data could be larger, calculate how much larger
 
 				if (offset != 0) { //We want to move all images that follow our changed image, if our new image is bigger
 					offsetTable.AddOffsetToFollowing(index + j + 1, offset);
@@ -59,7 +67,10 @@ namespace S4GFXLibrary.FileReader
 
 				i.DataOffset = 0; //Hack, the data is still at the same offset, but the way the we handle the reading forces us to set it to 0, as we write the new image data to buffer[0...] instead of buffer[DataOffset...]
 			}
+			//return GetDataBufferCollection(groupID);
+		}
 
+		public DataBufferCollection GetDataBufferCollection(string groupID) {
 			byte[] gfxDataBuffer = GetData();
 
 			byte[] pilDataBuffer = paletteCollection.GetPilFile().GetData();
@@ -67,12 +78,11 @@ namespace S4GFXLibrary.FileReader
 
 			string fileId = groupID;
 
-			File.WriteAllBytes(fileId + ".gfx", gfxDataBuffer);
-			File.WriteAllBytes(fileId + ".pi4", pilDataBuffer);
-			File.WriteAllBytes(fileId + ".p46", paletteDataBuffer);
-			File.WriteAllBytes(fileId + ".pi2", pilDataBuffer);
-			File.WriteAllBytes(fileId + ".p26", paletteDataBuffer);
-			File.WriteAllBytes(fileId + ".gil", offsetTable.GetData());
+			return new DataBufferCollection(fileId)
+				.AddBuffer(gfxDataBuffer, "gfx")
+				.AddBuffer(pilDataBuffer, "pi4", "pi2")
+				.AddBuffer(paletteDataBuffer, "p46", "p26")
+				.AddBuffer(offsetTable.GetData(), "gil");
 		}
 
 		public GfxFileReader(BinaryReader reader,
@@ -316,6 +326,15 @@ namespace S4GFXLibrary.FileReader
 			}
 
 			return gfxDataBuffer;
+		}
+
+		public void Close() {
+			baseStream.Close();
+			offsetTable?.baseStream.Close();
+			jobIndexList?.baseStream.Close();
+			directionIndexList?.baseStream.Close();
+			paletteCollection?.baseStream.Close();
+			paletteCollection?.GetPilFile().baseStream.Close();
 		}
 	}
 }

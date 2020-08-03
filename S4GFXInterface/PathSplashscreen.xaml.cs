@@ -26,11 +26,6 @@ namespace S4GFXInterface {
 			InitializeComponent();
 			Path.Text = Properties.Settings.Default.GamePath;
 
-		}
-		protected override void OnActivated(EventArgs e) {
-			base.OnActivated(e);
-			Cancel.Visibility = isDialogue ? Visibility.Visible : Visibility.Collapsed;
-
 			if (!isDialogue && CheckPath()) {
 				App.GamePath = Path.Text;
 				Properties.Settings.Default.GamePath = Path.Text;
@@ -40,6 +35,12 @@ namespace S4GFXInterface {
 				m.Show();
 				this.Close();
 			}
+		}
+		protected override void OnActivated(EventArgs e) {
+			base.OnActivated(e);
+			Cancel.Visibility = isDialogue ? Visibility.Visible : Visibility.Collapsed;
+
+
 		}
 
 		private void FolderDialog_Click(object sender, RoutedEventArgs e) {

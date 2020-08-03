@@ -41,6 +41,15 @@ namespace S4GFXLibrary.GFX
             return result;
         }
 
+		public void Done() {
+			Bits = null;
+			Bitmap b = new Bitmap(Bitmap);
+			Bitmap.Dispose();
+			BitsHandle.Free();
+
+			Bitmap = b;
+		}
+
         public void Dispose()
         {
             if (Disposed) return;

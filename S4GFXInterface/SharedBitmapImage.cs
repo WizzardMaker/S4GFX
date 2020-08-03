@@ -11,14 +11,22 @@ using System.Windows.Media.Imaging;
 public static class BitmapToBitmapSource
 {
 	public static BitmapSource ToBitmapSource(this Bitmap source) {
-		using (var handle = new SafeHBitmapHandle(source)) {
-			return System.Windows.Interop.Imaging.CreateBitmapSourceFromHBitmap(
-   source.GetHbitmap(Color.Red),
-   IntPtr.Zero,
-   System.Windows.Int32Rect.Empty,
-   BitmapSizeOptions.FromWidthAndHeight(source.Width, source.Height)); /*Imaging.CreateBitmapSourceFromHBitmap(handle.DangerousGetHandle(),
+		try {
+			using (var handle = new SafeHBitmapHandle(source)) {
+				return /*System.Windows.Interop.Imaging.CreateBitmapSourceFromHBitmap(
+					   source.GetHbitmap(Color.Red),
+					   IntPtr.Zero,
+					   System.Windows.Int32Rect.Empty,
+					   BitmapSizeOptions.FromWidthAndHeight(source.Width, source.Height));*/
+				Imaging.CreateBitmapSourceFromHBitmap(handle.DangerousGetHandle(),
 				IntPtr.Zero, Int32Rect.Empty,
-				BitmapSizeOptions.FromEmptyOptions());*/
+				BitmapSizeOptions.FromEmptyOptions());
+			}
+		}catch(Exception e) {
+			Console.WriteLine(e.Message);
+			Console.WriteLine(e.StackTrace);
+
+			return null;
 		}
 	}
 

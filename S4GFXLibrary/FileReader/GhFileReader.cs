@@ -29,6 +29,14 @@ namespace S4GFXLibrary.FileReader {
 			throw new System.NotImplementedException();
 		}
 
+		public void Close() {
+			baseStream.Close();
+		}
+
+		public DataBufferCollection GetDataBufferCollection(string groupID) {
+			throw new System.NotImplementedException();
+		}
+
 		public GhFileReader(BinaryReader reader) {
 			ReadResource(reader);
 

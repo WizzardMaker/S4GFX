@@ -143,5 +143,28 @@
     <Resource Include="Resources\Icons\icons8-exportieren-100.png" />
     <Resource Include="Resources\Icons\icons8-importieren-100.png" />
   </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Resources\Icons\icons8-ladeanimation-bild-1-100.png" />
+    <Resource Include="Resources\Icons\icons8-ladeanimation-bild-2-100.png" />
+    <Resource Include="Resources\Icons\icons8-ladeanimation-bild-3-100.png" />
+    <Resource Include="Resources\Icons\icons8-ladeanimation-bild-4-100.png" />
+    <Resource Include="Resources\Icons\icons8-ladeanimation-bild-5-100.png" />
+    <Resource Include="Resources\Icons\icons8-ladeanimation-bild-6-100.png" />
+    <Resource Include="Resources\Icons\icons8-ladeanimation-bild-7-100.png" />
+    <Resource Include="Resources\Icons\icons8-ladeanimation-bild-8-100.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Resources\Icons\icons8-ladeanimation-bild-1-50.png" />
+    <Resource Include="Resources\Icons\icons8-ladeanimation-bild-2-50.png" />
+    <Resource Include="Resources\Icons\icons8-ladeanimation-bild-3-50.png" />
+    <Resource Include="Resources\Icons\icons8-ladeanimation-bild-4-50.png" />
+    <Resource Include="Resources\Icons\icons8-ladeanimation-bild-5-50.png" />
+    <Resource Include="Resources\Icons\icons8-ladeanimation-bild-6-50.png" />
+    <Resource Include="Resources\Icons\icons8-ladeanimation-bild-7-50.png" />
+    <Resource Include="Resources\Icons\icons8-ladeanimation-bild-8-50.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Resources\Icons\icons8-zurück-96.png" />
+  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

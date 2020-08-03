@@ -29,6 +29,8 @@ namespace S4GFXInterface
 
 		ImageGrid exportImageGrid;
 
+		private int loadingIconCounter = 0;
+
 		public string PathAddress {
 			get {
 				return App.GamePath;
@@ -48,12 +50,26 @@ namespace S4GFXInterface
 			header.AddButton(SettingsB, Settings);
 
 			exportImageGrid = new ImageGrid(ExportGrid);
+			exportImageGrid.SetGroupView();
 
 			GetAllGroups();
 
-			Load(App.GamePath + "/GFX/0");
-			SaveAllBitmaps("");
+			exportImageGrid.ViewModeChanged += (mode) => ReturnToGroupBut.Visibility = mode == ImageGrid.ViewMode.ImageGroup ? Visibility.Visible : Visibility.Collapsed;
+			exportImageGrid.ViewModeChanged += CacheExportScrollPosition;
+
+			ExportGroupIDs.SelectedIndex = 0;
 			//ExportGrid.Children.Add(new ExportedBitmap());
+		}
+
+		double exportScrollPosition = 0.0d;
+		private void CacheExportScrollPosition(ImageGrid.ViewMode mode) {
+			if (mode == ImageGrid.ViewMode.Group) {
+				ExportScrollView.ScrollToVerticalOffset(exportScrollPosition);
+			} else {
+				exportScrollPosition = ExportScrollView.VerticalOffset;
+				ExportScrollView.ScrollToTop();
+			}
+
 		}
 
 		void GetAllGroups() {
@@ -86,11 +102,13 @@ namespace S4GFXInterface
 			//OnPropertyChanged("PathAddress");
 		}
 
-		static public ICollectionFileReader Load(string fileId) {
+		public ICollectionFileReader Load(string fileId) {
 
 			bool gfx = File.Exists(fileId + ".gfx");
 			bool gh = File.Exists(fileId + ".gh6");
 
+
+			gfxFile?.Close();
 			if (gh) {
 				return DoLoadGH(fileId);
 			}
@@ -102,11 +120,17 @@ namespace S4GFXInterface
 			bool pil = File.Exists(fileId + ".pil");
 			bool jil = File.Exists(fileId + ".jil");
 
+			if (jil) {
+				exportImageGrid.SetGroupView();
+			} else {
+				exportImageGrid.ShowAll();
+			}
+
 
 			return DoLoad(fileId, pil, jil);
 		}
 
-		static public ICollectionFileReader DoLoadGH(string fileId) {
+		public ICollectionFileReader DoLoadGH(string fileId) {
 			var gh = new BinaryReader(File.Open(fileId + ".gh5", FileMode.Open), Encoding.Default, true);
 			//var gl = new BinaryReader(File.Open(fileId + ".gl5", FileMode.Open), Encoding.Default, true);
 
@@ -118,7 +142,7 @@ namespace S4GFXInterface
 			return gfxFile;
 		}
 
-		static public ICollectionFileReader DoLoad(string fileId, bool usePli, bool useJil) {
+		public ICollectionFileReader DoLoad(string fileId, bool usePli, bool useJil) {
 			//Console.WriteLine($"Using .jil={useJil}");
 
 			var gfx = new BinaryReader(File.Open(fileId + ".gfx", FileMode.Open), Encoding.Default, true);
@@ -176,21 +200,52 @@ namespace S4GFXInterface
 			source = new CancellationTokenSource();
 			CancellationToken token = source.Token;
 
+			GC.Collect();
+			GC.WaitForPendingFinalizers();
+			GC.Collect();
+
 			Task.Run(() => {
+				int loaded = 1;
 				int count = file.GetImageCount();
-				for (int i = 0; i < count; i++) {
+
+				Parallel.For(0, count, (i, state) => {
+					//for (int i = 0; i < count; i++) {
+					if (token.IsCancellationRequested) {
+						state.Break();
+					}
+
 					try {
-						token.ThrowIfCancellationRequested();
 						exportImageGrid.AddImage(file.GetImage(i));
 
-						Dispatcher.Invoke((Action)delegate { ExportLoadCount.Text = $"Loaded: {i+1}/{count}"; });
+						if (token.IsCancellationRequested) {
+							state.Break();
+						}
+
+						Dispatcher.Invoke((Action)delegate {
+							try {
+								ExportLoadCount.Text = $"Loaded: {loaded++}/{count}";
+								LoadingIcon.Visibility = Visibility.Visible;
+							} catch (Exception e) {
+								Console.WriteLine(e.Message);
+								Console.WriteLine(e.StackTrace);
+							}
+						});
+
 						//SaveToBitmap(path, i, file);
 					} catch (Exception e) {
 						Console.WriteLine(e.Message);
 						Console.WriteLine(e.StackTrace);
 					}
-				}
-			}, token);
+				});//}
+
+				Dispatcher.Invoke((Action)delegate {
+					LoadingIcon.Visibility = Visibility.Hidden;
+				});
+
+				Dispatcher.Invoke((Action)delegate {
+					exportImageGrid.UpdateView();
+				});
+				}, token);
 			
 
 			Console.WriteLine($"Saved: " + path);
@@ -222,9 +277,37 @@ namespace S4GFXInterface
 		}
 
 		private void ExportGroupIDs_SelectionChanged(object sender, SelectionChangedEventArgs e) {
+			ExportScrollView.ScrollToTop();
+
 			exportImageGrid.Clear();
+			source.Cancel();
+
+			exportImageGrid.SetContainer( int.Parse((string)ExportGroupIDs.SelectedItem));
 			Load(App.GamePath + "/GFX/" + ExportGroupIDs.SelectedItem);
+
 			SaveAllBitmaps("");
+		}
+
+		private void UpdateLoadingSpinner() {
+			string filename = "Resources/Icons/icons8-ladeanimation-bild-" + loadingIconCounter + "-50.png";
+			BitmapImage image = new BitmapImage();
+			image.BeginInit();
+			image.UriSource = new Uri(filename, UriKind.Relative);
+			image.EndInit();
+			LoadingIcon.Source = image;
+			loadingIconCounter++;
+			if (loadingIconCounter > 8) {
+				loadingIconCounter = 1;    // Display first image after the last image
+			}
+		}
+
+		private void LoadingAnim_Completed(object sender, EventArgs e) {
+			UpdateLoadingSpinner();
+			loadingAnim.BeginAnimation(Image.WidthProperty, loadingAnim);
+		}
+
+		private void ReturnToGroupBut_Click(object sender, RoutedEventArgs e) {
+			exportImageGrid.SetGroupView();
 		}
 	}
 }

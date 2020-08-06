@@ -8,7 +8,7 @@
 			 Width="175" Height="200"
              d:DesignHeight="200" d:DesignWidth="800">
 	<StackPanel>
-		<Image x:Name="MainImage" Height="150"/>
+		<Image x:Name="MainImage" Height="150" RenderOptions.BitmapScalingMode="NearestNeighbor"/>
 		<Label x:Name="ImageText" Content="ID:51501     &#xA;125x12px" HorizontalAlignment="Center" VerticalAlignment="Center" HorizontalContentAlignment="Center" ScrollViewer.VerticalScrollBarVisibility="Disabled" VerticalContentAlignment="Center"/>
 	</StackPanel>
 </UserControl>

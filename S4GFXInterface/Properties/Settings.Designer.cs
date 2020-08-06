@@ -34,5 +34,41 @@ namespace S4GFXInterface.Properties {
                 this["GamePath"] = value;
             }
         }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("")]
+        public string ExportPath {
+            get {
+                return ((string)(this["ExportPath"]));
+            }
+            set {
+                this["ExportPath"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("False")]
+        public bool ExportToContainer {
+            get {
+                return ((bool)(this["ExportToContainer"]));
+            }
+            set {
+                this["ExportToContainer"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("False")]
+        public bool ExportToGroup {
+            get {
+                return ((bool)(this["ExportToGroup"]));
+            }
+            set {
+                this["ExportToGroup"] = value;
+            }
+        }
     }
 }

@@ -35,7 +35,6 @@ namespace S4GFXInterface.Controls
 			}
 		}
 
-
 		public ExportedBitmap() {
 			InitializeComponent();
 			DataContext = this;
@@ -48,13 +47,8 @@ namespace S4GFXInterface.Controls
 
 		public void UpdateGraphic(Bitmap b) {
 			Dispatcher.BeginInvoke((Action)delegate {
-				try {
-					MainImage.Source = b?.ToBitmapSource();
-					UpdateText();
-				}catch(Exception e) {
-					Console.WriteLine(e.Message);
-					Console.WriteLine(e.StackTrace);
-				}
+				MainImage.Source = b?.ToBitmapSource();
+				UpdateText();
 			}, System.Windows.Threading.DispatcherPriority.Input);
 		}
 

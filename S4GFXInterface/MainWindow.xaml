@@ -16,7 +16,7 @@
 			</DockPanel.Background>
 			<uc:HeaderButton x:Name="ExportB" Heading="Export" ImageSource="/Resources/Icons/icons8-exportieren-100.png"/>
 
-			<uc:HeaderButton x:Name="ImportB" Heading="Import" ImageSource="/Resources/Icons/icons8-importieren-100.png"/>
+			<uc:HeaderButton x:Name="ImportB" Heading="Import" ImageSource="/Resources/Icons/icons8-importieren-100.png" IsEnabled="False"/>
 
 			<uc:HeaderButton x:Name="SettingsB" Heading="Settings" ImageSource="/Resources/Icons/icons8-einstellungen-100.png"/>
 
@@ -32,10 +32,13 @@
 								<TextBlock TextWrapping="Wrap" Text="Return to group" Margin="0" Width="101"/>
 							</StackPanel>
 						</Button>
-						<ComboBox x:Name="ExportGroupIDs" HorizontalAlignment="Left" VerticalAlignment="Top" Width="96" Margin="76,10,0,0" SelectionChanged="ExportGroupIDs_SelectionChanged"/>
+						<ComboBox x:Name="ExportGroupIDs" HorizontalAlignment="Left" VerticalAlignment="Top" Width="96" Margin="76,10,0,0" SelectionChanged="ExportGroupIDs_SelectionChanged" IsEnabled="{Binding IsNotLoading}"/>
 						<Label HorizontalAlignment="Left" Margin="10,6,0,0" VerticalAlignment="Top" Width="66">
 							<TextBlock HorizontalAlignment="Left" TextWrapping="Wrap" Text="Group ID:" VerticalAlignment="Top"/>
 						</Label>
+						<Button x:Name="ExportSaveToDiskSingle" Height="22" Content="Save selected to Disk" Margin="174,416,10,10" Click="ExportSaveToDiskSingle_Click" IsEnabled="{Binding CanExportSingle}"/>
+						<Button x:Name="ExportSaveToDiskGroup" Height="22" Content="Save group to Disk" Margin="10,416,174,10" Click="ExportSaveToDiskGroup_Click"  IsEnabled="{Binding CanExportGroup}"/>
+						<Button x:Name="ExportSaveToDiskAll" Height="22" Content="Save All to Disk" Margin="92,389,92,37" Click="ExportSaveToDiskAll_Click"  IsEnabled="{Binding CanExportAll}"/>
 					</Grid>
 					<StatusBar HorizontalContentAlignment="Center" VerticalContentAlignment="Center" DockPanel.Dock="Bottom" BorderThickness="0 1 0 0" BorderBrush="{DynamicResource {x:Static SystemColors.ControlDarkBrushKey}}" Margin="-328,0,0,0">
 						<StatusBarItem>
@@ -74,17 +77,44 @@
 							<TextBlock x:Name="lblCursorPosition1" Text="Hello!"/>
 						</StatusBarItem>
 					</StatusBar>
+					<Grid Height="448" VerticalAlignment="Top" Width="1058">
+						<Label Content="Import Path:" HorizontalAlignment="Left" Margin="10,46,0,0" VerticalAlignment="Top"/>
+						<Border BorderBrush="Black" BorderThickness="1" HorizontalAlignment="Left" Height="27" Margin="10,67,0,0" VerticalAlignment="Top" Width="473">
+							<Grid HorizontalAlignment="Left" Height="26" Margin="0,0,-1,-1" VerticalAlignment="Top" Width="472">
+								<TextBlock x:Name="SettlerPath1" HorizontalAlignment="Left" TextWrapping="NoWrap" TextTrimming="CharacterEllipsis" Text="{Binding PathAddress}" VerticalAlignment="Top" Width="297" Margin="5,4,0,0"/>
+								<Button x:Name="ChangePath1" Content="Change..." HorizontalAlignment="Left" Margin="307,2,0,0" VerticalAlignment="Top" Width="75" Click="ChangePath_Click"/>
+								<Button x:Name="OpenPath1" Content="Open" HorizontalAlignment="Left" Margin="387,2,0,0" VerticalAlignment="Top" Width="75" Click="OpenPath_Click"/>
+							</Grid>
+						</Border>
+						<CheckBox Content="Include subfolders" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="10,99,0,0"/>
+						<Button Content="Prepare" HorizontalAlignment="Left" VerticalAlignment="Top" Width="75" Margin="191,19,0,0"/>
+						<ComboBox x:Name="ExportGroupIDs_Copy" HorizontalAlignment="Left" VerticalAlignment="Top" Width="96" Margin="76,19,0,0" SelectionChanged="ExportGroupIDs_SelectionChanged" IsEnabled="{Binding IsNotLoading}"/>
+						<Label HorizontalAlignment="Left" Margin="10,15,0,0" VerticalAlignment="Top" Width="66">
+							<TextBlock HorizontalAlignment="Left" TextWrapping="Wrap" Text="Group ID:" VerticalAlignment="Top"/>
+						</Label>
+					</Grid>
 				</DockPanel>
 			</TabItem>
 			<TabItem x:Name="Settings" Header="Settings">
 				<Grid Margin="0,0,0,0">
 					<Label Content="Current Settler IV Path:" HorizontalAlignment="Left" Margin="10,10,0,0" VerticalAlignment="Top"/>
-					<Border BorderBrush="Black" BorderThickness="1" HorizontalAlignment="Left" Height="27" Margin="10,31,0,0" VerticalAlignment="Top" Width="393">
-						<Grid HorizontalAlignment="Left" Height="26" Margin="0,0,0,-1" VerticalAlignment="Top" Width="382">
+					<Border BorderBrush="Black" BorderThickness="1" HorizontalAlignment="Left" Height="27" Margin="10,31,0,0" VerticalAlignment="Top" Width="473">
+						<Grid HorizontalAlignment="Left" Height="26" Margin="0,0,-1,-1" VerticalAlignment="Top" Width="472">
 							<TextBlock x:Name="SettlerPath" HorizontalAlignment="Left" TextWrapping="NoWrap" TextTrimming="CharacterEllipsis" Text="{Binding PathAddress}" VerticalAlignment="Top" Width="297" Margin="5,4,0,0"/>
 							<Button x:Name="ChangePath" Content="Change..." HorizontalAlignment="Left" Margin="307,2,0,0" VerticalAlignment="Top" Width="75" Click="ChangePath_Click"/>
+							<Button x:Name="OpenPath" Content="Open" HorizontalAlignment="Left" Margin="387,2,0,0" VerticalAlignment="Top" Width="75" Click="OpenPath_Click"/>
 						</Grid>
 					</Border>
+					<Label Content="Export path:" HorizontalAlignment="Left" Margin="10,64,0,0" VerticalAlignment="Top"/>
+					<Border BorderBrush="Black" BorderThickness="1" HorizontalAlignment="Left" Height="27" Margin="10,85,0,0" VerticalAlignment="Top" Width="473">
+						<Grid HorizontalAlignment="Left" Height="26" Margin="0,0,-1,-1" VerticalAlignment="Top" Width="472">
+							<TextBlock x:Name="ExportPath" HorizontalAlignment="Left" TextWrapping="NoWrap" TextTrimming="CharacterEllipsis" Text="{Binding ExportPathAddress, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" VerticalAlignment="Top" Width="297" Margin="5,4,0,0"/>
+							<Button x:Name="ChangeExportPath" Content="Change..." HorizontalAlignment="Left" Margin="307,2,0,0" VerticalAlignment="Top" Width="75" Click="ChangeExportPath_Click"/>
+							<Button x:Name="OpenExportPath" Content="Open" HorizontalAlignment="Left" Margin="387,2,0,0" VerticalAlignment="Top" Width="75" Click="OpenExportPath_Click"/>
+						</Grid>
+					</Border>
+					<CheckBox x:Name="SettingExportContainer" Content="Export to container folder? eg. Export to /1/1.png instead of /1.png" HorizontalAlignment="Left" Margin="13,124,0,0" VerticalAlignment="Top" IsChecked="{Binding ExportToContainer}"/>
+					<CheckBox x:Name="SettingExportGroup" Content="Export to group folder? eg. Export to /225/1.png" HorizontalAlignment="Left" Margin="13,144,0,0" VerticalAlignment="Top" IsChecked="{Binding ExportToGroup}"/>
 				</Grid>
 			</TabItem>
 		</TabControl>

@@ -1,7 +1,10 @@
-﻿using S4GFXInterface.Controls;
+﻿using Microsoft.WindowsAPICodePack.Dialogs;
+using S4GFXInterface.Controls;
 using S4GFXLibrary.FileReader;
 using System;
 using System.Collections.Generic;
+using System.ComponentModel;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Text;
@@ -22,14 +25,69 @@ namespace S4GFXInterface
 	/// <summary>
 	/// Interaktionslogik für MainWindow.xaml
 	/// </summary>
-	public partial class MainWindow : Window
+	public partial class MainWindow : Window, INotifyPropertyChanged
 	{
 		HeaderManager header;
 		private static ICollectionFileReader gfxFile;
 
 		ImageGrid exportImageGrid;
 
-		private int loadingIconCounter = 0;
+		bool isNotLoading;
+		public bool IsNotLoading {
+			get {
+				return isNotLoading;
+			}
+			set {
+				isNotLoading = value;
+				RaisePropertyChanged(nameof(IsNotLoading));
+			}
+		}
+
+		public bool containerHasGroups;
+
+		bool _canExportAll, _canExportGroup, _canExportSingle;
+		public bool CanExport {
+			set {
+				if (value == false) {
+					CanExportAll = false;
+					CanExportGroup = false;
+					CanExportSingle = false;
+				}
+			}
+			get {
+				return CanExportAll || CanExportGroup || CanExportSingle;
+			}
+		}
+
+		public bool CanExportAll {
+			get {
+				return _canExportAll;
+			}
+			set {
+				_canExportAll = value;
+				RaisePropertyChanged(nameof(CanExportAll));
+			}
+		}
+		public bool CanExportGroup {
+			get {
+				return _canExportGroup;
+			}
+			set {
+				_canExportGroup = value;
+				RaisePropertyChanged(nameof(CanExportGroup));
+			}
+		}
+		public bool CanExportSingle {
+			get {
+				return _canExportSingle;
+			}
+			set {
+				_canExportSingle = value;
+				RaisePropertyChanged(nameof(CanExportSingle));
+			}
+		}
+
+		private int loadingIconCounter = 1;
 
 		public string PathAddress {
 			get {
@@ -37,8 +95,46 @@ namespace S4GFXInterface
 			}
 		}
 
+		public bool ExportToContainer {
+			get {
+				return Properties.Settings.Default.ExportToContainer;
+			}
+
+			set {
+				Properties.Settings.Default.ExportToContainer = value;
+				Properties.Settings.Default.Save();
+				RaisePropertyChanged(nameof(ExportToContainer));
+			}
+		}
+		public bool ExportToGroup {
+			get {
+				return Properties.Settings.Default.ExportToGroup;
+			}
+
+			set {
+				Properties.Settings.Default.ExportToGroup = value;
+				Properties.Settings.Default.Save();
+				RaisePropertyChanged(nameof(ExportToGroup));
+			}
+		}
+
+		private string exportPathAddress;
+		public string ExportPathAddress {
+			get {
+				return exportPathAddress;
+			}
+			set {
+				exportPathAddress = value;
+			}
+		}
+
 		public MainWindow() {
 			InitializeComponent();
+
+			ExportPathAddress = Properties.Settings.Default.ExportPath;
+
+			DataContext = this;
+
 			Import.Visibility = Visibility.Collapsed;
 			Export.Visibility = Visibility.Collapsed;
 			Settings.Visibility = Visibility.Collapsed;
@@ -54,11 +150,35 @@ namespace S4GFXInterface
 
 			GetAllGroups();
 
-			exportImageGrid.ViewModeChanged += (mode) => ReturnToGroupBut.Visibility = mode == ImageGrid.ViewMode.ImageGroup ? Visibility.Visible : Visibility.Collapsed;
+			exportImageGrid.ViewModeChanged += (mode) => {
+				switch (mode) {
+					case ImageGrid.ViewMode.Group:
+					ExportAllView();
+					break;
+					case ImageGrid.ViewMode.ImageGroup:
+					ExportImageGroupView();
+					break;
+					case ImageGrid.ViewMode.All:
+					ExportAllView();
+					break;
+				}
+
+			};
 			exportImageGrid.ViewModeChanged += CacheExportScrollPosition;
+			exportImageGrid.SelectionChanged += ExportSelectionChanged;
 
 			ExportGroupIDs.SelectedIndex = 0;
 			//ExportGrid.Children.Add(new ExportedBitmap());
+		}
+
+		private void ExportSelectionChanged(ImageGrid.ImageView view) {
+			CanExportSingle = true;
+		}
+
+		//INotifyPropertyChanged
+		public event PropertyChangedEventHandler PropertyChanged;
+		protected void RaisePropertyChanged(string name) {
+			PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(name));
 		}
 
 		double exportScrollPosition = 0.0d;
@@ -72,10 +192,24 @@ namespace S4GFXInterface
 
 		}
 
+		private void ExportImageGroupView() {
+			ReturnToGroupBut.Visibility = Visibility.Visible;
+			CanExportGroup = true;
+			CanExportAll = false;
+			CanExportSingle = false;
+		}
+
+		private void ExportAllView() {
+			ReturnToGroupBut.Visibility = Visibility.Collapsed;
+			CanExportGroup = false;
+			CanExportAll = true;
+			CanExportSingle = false;
+		}
+
 		void GetAllGroups() {
 			List<string> ids = new List<string>();
 
-			foreach(string f in Directory.GetFiles(App.GamePath+"/GFX/", "*.gfx")) {
+			foreach (string f in Directory.GetFiles(App.GamePath + "/GFX/", "*.gfx")) {
 				ids.Add(System.IO.Path.GetFileNameWithoutExtension(f));
 			}
 
@@ -91,8 +225,16 @@ namespace S4GFXInterface
 			header.RefreshAll();
 		}
 
-		private void Button_Click(object sender, RoutedEventArgs e) {
-
+		private void ChangeExportPath_Click(object sender, RoutedEventArgs e) {
+			CommonOpenFileDialog dialog = new CommonOpenFileDialog();
+			dialog.InitialDirectory = "\\";
+			dialog.IsFolderPicker = true;
+			if (dialog.ShowDialog() == CommonFileDialogResult.Ok) {
+				ExportPathAddress = dialog.FileName;
+				RaisePropertyChanged("ExportPathAddress");
+				Properties.Settings.Default.ExportPath = ExportPathAddress;
+				Properties.Settings.Default.Save();
+			}
 		}
 
 		private void ChangePath_Click(object sender, RoutedEventArgs e) {
@@ -119,6 +261,8 @@ namespace S4GFXInterface
 
 			bool pil = File.Exists(fileId + ".pil");
 			bool jil = File.Exists(fileId + ".jil");
+
+			containerHasGroups = jil;
 
 			if (jil) {
 				exportImageGrid.SetGroupView();
@@ -185,6 +329,7 @@ namespace S4GFXInterface
 			palette?.Close();
 			directionIndex?.Close();
 			jobIndex?.Close();
+			gfxFile?.Close();
 
 			return gfxFile;
 		}
@@ -195,6 +340,9 @@ namespace S4GFXInterface
 			Console.WriteLine($"Start saving: " + path);
 			//Parallel.For(0, gfxFile.GetImageCount(), (i) => { SaveToBitmap(path, i); });
 			file = file ?? gfxFile;
+
+			IsNotLoading = false;
+			CanExport = false;
 
 			source.Cancel();
 			source = new CancellationTokenSource();
@@ -239,14 +387,17 @@ namespace S4GFXInterface
 				});//}
 
 				Dispatcher.Invoke((Action)delegate {
-					LoadingIcon.Visibility = Visibility.Hidden;
+					exportImageGrid.UpdateView();
 				});
 
 				Dispatcher.Invoke((Action)delegate {
-					exportImageGrid.UpdateView();
+					LoadingIcon.Visibility = Visibility.Hidden;
 				});
-				}, token);
-			
+
+				CanExportAll = true;
+				IsNotLoading = true;
+			}, token);
+
 
 			Console.WriteLine($"Saved: " + path);
 		}
@@ -282,7 +433,7 @@ namespace S4GFXInterface
 			exportImageGrid.Clear();
 			source.Cancel();
 
-			exportImageGrid.SetContainer( int.Parse((string)ExportGroupIDs.SelectedItem));
+			exportImageGrid.SetContainer(int.Parse((string)ExportGroupIDs.SelectedItem));
 			Load(App.GamePath + "/GFX/" + ExportGroupIDs.SelectedItem);
 
 			SaveAllBitmaps("");
@@ -301,6 +452,27 @@ namespace S4GFXInterface
 			}
 		}
 
+		public string GetFullPath(int group = -1) {
+			string basePath = ExportPathAddress;
+
+			if (Properties.Settings.Default.ExportToContainer) {
+				basePath += $"/{ExportGroupIDs.SelectedItem}";
+
+				if (!Directory.Exists(basePath)) {
+					Directory.CreateDirectory(basePath);
+				}
+			}
+
+			if (Properties.Settings.Default.ExportToGroup && containerHasGroups) {
+				basePath += $"/{group}";
+				if (!Directory.Exists(basePath)) {
+					Directory.CreateDirectory(basePath);
+				}
+			}
+
+			return basePath;
+		}
+
 		private void LoadingAnim_Completed(object sender, EventArgs e) {
 			UpdateLoadingSpinner();
 			loadingAnim.BeginAnimation(Image.WidthProperty, loadingAnim);
@@ -308,6 +480,30 @@ namespace S4GFXInterface
 
 		private void ReturnToGroupBut_Click(object sender, RoutedEventArgs e) {
 			exportImageGrid.SetGroupView();
+		}
+
+		private void OpenPath_Click(object sender, RoutedEventArgs e) {
+			Process.Start(PathAddress);
+		}
+
+		private void OpenExportPath_Click(object sender, RoutedEventArgs e) {
+			Process.Start(ExportPathAddress);
+		}
+
+		private void ExportSaveToDiskSingle_Click(object sender, RoutedEventArgs e) {
+			exportImageGrid.selectedItem.SaveBitmapToFile(GetFullPath(exportImageGrid.selectedItem.Group));
+		}
+
+		private void ExportSaveToDiskGroup_Click(object sender, RoutedEventArgs e) {
+			foreach (var i in exportImageGrid.GetImagesInCurrentGroup()) {
+				i.SaveBitmapToFile(GetFullPath(i.Group));
+			}
+		}
+
+		private void ExportSaveToDiskAll_Click(object sender, RoutedEventArgs e) {
+			foreach (var i in exportImageGrid.GetAllImages()) {
+				i.SaveBitmapToFile(GetFullPath(i.Group));
+			}
 		}
 	}
 }

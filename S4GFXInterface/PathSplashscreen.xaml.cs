@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -18,13 +19,15 @@ namespace S4GFXInterface {
 	/// <summary>
 	/// Window to select the "Settler IV" game folder
 	/// </summary>
-	public partial class PathSplashscreen : Window {
+	public partial class PathSplashscreen : Window	{
 		public bool isDialogue;
-
 
 		public PathSplashscreen() {
 			InitializeComponent();
 			Path.Text = Properties.Settings.Default.GamePath;
+		}
+		protected override void OnActivated(EventArgs e) {
+			base.OnActivated(e);
 
 			if (!isDialogue && CheckPath()) {
 				App.GamePath = Path.Text;
@@ -34,13 +37,10 @@ namespace S4GFXInterface {
 				MainWindow m = new MainWindow();
 				m.Show();
 				this.Close();
+				return;
 			}
-		}
-		protected override void OnActivated(EventArgs e) {
-			base.OnActivated(e);
+
 			Cancel.Visibility = isDialogue ? Visibility.Visible : Visibility.Collapsed;
-
-
 		}
 
 		private void FolderDialog_Click(object sender, RoutedEventArgs e) {

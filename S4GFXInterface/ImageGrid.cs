@@ -16,9 +16,12 @@ namespace S4GFXInterface
 		int currentGroup;
 		int currentContainer = 0;
 
-		public event Action<ViewMode> ViewModeChanged;
+		public ImageView selectedItem;
 
-		List<ImageView> images = new List<ImageView>();
+		public event Action<ViewMode> ViewModeChanged;
+		public event Action<ImageView> SelectionChanged;
+
+		volatile List<ImageView> images = new List<ImageView>();
 
 		internal ViewMode CurrentMode { get => currentMode; set { currentMode = value; ViewModeChanged?.Invoke(value); } }
 
@@ -27,9 +30,9 @@ namespace S4GFXInterface
 			DirectBitmap bitmap;
 			private ExportedBitmap gridElement;
 
-			private bool removeAlpha;
+			private bool removeAlpha = true;
 			private bool onlyShadows;
-			private bool removeShadows;
+			private bool removeShadows = true;
 
 			ImageData data;
 
@@ -91,6 +94,13 @@ namespace S4GFXInterface
 				};
 
 				b.Done();
+			}
+
+			public void SaveBitmapToFile(string path) {
+				if(bitmap == null)
+					CreateBitmap();
+
+				bitmap.Bitmap.Save(path + "/" + image.Index + ".png", System.Drawing.Imaging.ImageFormat.Png);
 			}
 
 			private ExportedBitmap GetNewGridElement() {
@@ -167,10 +177,15 @@ namespace S4GFXInterface
 				grid.Children.Clear();
 
 				foreach (var i in groupItems) {
+					if (i == null)
+						continue;
+
 					i.GridElement.IsGroupView = CurrentMode == ViewMode.Group;
 
 					if (CurrentMode == ViewMode.Group)
-						i.GridElement.MouseLeftButtonDown += (ob, argss) => { EnterImageView(i.Group); };
+						i.GridElement.MouseLeftButtonDown += (ob, args) => { EnterImageView(i.Group); };
+					else
+						i.GridElement.MouseLeftButtonDown += (ob, args) => { selectedItem = i; SelectionChanged?.Invoke(i); };
 
 					grid.Children.Add(i.GridElement);
 					grid.RowCount = images.Count / 3 + 3;
@@ -186,18 +201,27 @@ namespace S4GFXInterface
 			currentGroup = group;
 
 			images = images.OrderBy((item) => item?.Id).ToList();
-			var groupItems = from i in images
-							 where i != null
-							 where i.Group == currentGroup
-							 select i;
+			IEnumerable<ImageView> groupItems = GetImagesInCurrentGroup();
 
 			UpdateView(groupItems);
+		}
+
+		public IEnumerable<ImageView> GetImagesInCurrentGroup() {
+			return from i in images
+				   where i != null
+				   where i.Group == currentGroup
+				   select i;
+		}
+		public IEnumerable<ImageView> GetAllImages() {
+			return from i in images
+				   where i != null
+				   select i;
 		}
 
 		public void ShowAll() {
 			CurrentMode = ViewMode.All;
 
-			images = images.OrderBy((item) => item.Id).ToList();
+			images = images.OrderBy((item) => item?.Id).ToList();
 			//groupItems.ToList().OrderBy((item) => item.Group);
 
 			UpdateView(images);
@@ -214,22 +238,6 @@ namespace S4GFXInterface
 				Console.WriteLine(e.Message);
 				Console.WriteLine(e.StackTrace);
 			}
-			//ExportedBitmap element = null;
-
-			//grid.Dispatcher.Invoke((Action) delegate {
-			//	element = new ExportedBitmap();
-
-			//	if (currentMode == ViewMode.All || (currentMode == ViewMode.ImageGroup && img.GroupIndex == currentGroup)) {
-			//		grid.Children.Add(element);
-			//		grid.RowCount = images.Count / 3 + 3;
-			//	} else {
-			//		//SetGroupView();
-			//	}
-			//},System.Windows.Threading.DispatcherPriority.Input);
-
-			//element.SetImage(img);
-			//ImageView v = new ImageView(img);
-			//images.Add(v);
 		}
 
 		public void Clear() {

@@ -144,10 +144,7 @@ namespace S4GFXLibrary.GFX
 			return data;
         }
 
-        private byte[] WriteImageDataWithNoEncoding(byte[] data, int pos, int length)
-        {
-            throw new NotImplementedException();
-        }
+
 
         /// <summary>
         /// Counts the times a value was repeated. Used in the RunLengthEncoding as it replaces duplicates by [value,repeats]
@@ -199,7 +196,35 @@ namespace S4GFXLibrary.GFX
             return count;
         }
 
-        private byte[] CreateImageDataWithRunLengthEncoding(byte[] data, int length)
+		private byte[] WriteImageDataWithNoEncoding(byte[] data, int pos, int length) {
+			List<byte> newData = new List<byte>();
+
+			for (int i = 0; i < length; i += 4) {
+				int value;
+
+				byte red = data[i + 0];
+				byte green = data[i + 1];
+				byte blue = data[i + 2];
+				byte alpha = data[i + 3];
+
+				value = palette.GetIndex(paletteOffset, Palette.RGBToPalette(red, green, blue));
+				if (value == -1) {
+					Console.WriteLine($"Invalid color - not found in the palette! Color: R:{red}, G:{green}, B:{blue}");
+				}
+
+				value = value - paletteOffset;
+
+				if (value >= 252) {
+					Console.WriteLine("Invalid color - not found in the palette!");
+				}
+
+				newData.Add((byte)value);
+			}
+
+			return newData.ToArray();
+		}
+
+		private byte[] CreateImageDataWithRunLengthEncoding(byte[] data, int length)
         {
             List<byte> newData = new List<byte>();
 
@@ -229,7 +254,7 @@ namespace S4GFXLibrary.GFX
                 {
                     value = palette.GetIndex(paletteOffset, Palette.RGBToPalette(red, green, blue));
 					if(value == -1) {
-						Console.WriteLine("Invalid color - not found in the palette!");
+						Console.WriteLine($"Invalid color - not found in the palette! Color: R:{red}, G:{green}, B:{blue}");
 					}
 
                     value = value - paletteOffset;

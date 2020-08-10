@@ -44,11 +44,25 @@ namespace S4GFXLibrary.FileReader
 
 			//Prepare the new palette
 			Palette p = paletteCollection.GetPalette();
-			int start = paletteCollection.GetOffset((GetImage(index) as GfxImage).jobIndex);
 
 			int palettePosition = 0;
+			int oldIndex = (GetImage(index) as GfxImage).jobIndex;
 			for (int j = 0; j < newDatas.Length; j++) {
+				if(index + j > images.Length) {
+					Array.Resize(ref images, index + j + 1);
+					images[index + j] = new GfxImage(
+						null,
+						p,
+						paletteCollection.GetOffset((GetImage(index + j - 1) as GfxImage).jobIndex));
+				}
+
 				GfxImage i = images[index + j];
+
+				if(i.jobIndex != oldIndex) {
+					palettePosition = 0;
+				}
+
+				int start = paletteCollection.GetOffset(i.jobIndex);
 
 				i.Width = newDatas[j].width;
 				i.Height = newDatas[j].height;
@@ -66,6 +80,10 @@ namespace S4GFXLibrary.FileReader
 				}
 
 				i.DataOffset = 0; //Hack, the data is still at the same offset, but the way the we handle the reading forces us to set it to 0, as we write the new image data to buffer[0...] instead of buffer[DataOffset...]
+
+				oldIndex = i.jobIndex;
+
+				Console.WriteLine($"{j}/{newDatas.Length} importing...");
 			}
 			//return GetDataBufferCollection(groupID);
 		}
@@ -321,6 +339,9 @@ namespace S4GFXLibrary.FileReader
 
 					gfxDataBuffer[offsetTable.GetImageOffset(j + 1) - 1] = 0;
 					gfxDataBuffer[offsetTable.GetImageOffset(j + 1) - 2] = 1;
+					gfxDataBuffer[offsetTable.GetImageOffset(j + 1) - 3] = 2;
+					gfxDataBuffer[offsetTable.GetImageOffset(j + 1) - 4] = 2;
+					gfxDataBuffer[offsetTable.GetImageOffset(j + 1) - 5] = 2;
 					//gfxDataBuffer[offsetTable.GetImageOffset(j + 1) - 3] = 1;
 				}
 			}

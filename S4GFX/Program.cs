@@ -3,9 +3,12 @@ using S4GFXLibrary.GFX;
 using System;
 using System.Collections.Generic;
 using System.Drawing;
+using System.Drawing.Imaging;
 using System.IO;
 using System.Linq;
+using System.Runtime.InteropServices;
 using System.Text;
+using System.Threading.Tasks;
 
 namespace S4GFX
 {
@@ -350,7 +353,7 @@ namespace S4GFX
 		private static ImageData[] LoadFromBitmap(string path, int i, ICollectionFileReader file) {
 			IGfxImage image = file.GetImage(i);
 
-			bool saveByIndex = file.HasDIL;
+			bool saveByIndex = false;//file.HasDIL;
 			int jobIndex = saveByIndex ? (image as GfxImage).jobIndex : 0;
 
 			string basePath = $"export/{path}/{(saveByIndex ? $"{jobIndex}/" : "")}";
@@ -359,7 +362,8 @@ namespace S4GFX
 			var files = Directory.GetFiles(basePath, "*.*");
 			int maxlen = files.Max(x => x.Length);
 			var result = files.OrderBy(x => x.PadLeft(maxlen, '0')).ToList();
-			
+
+			int ind = 0;
 			foreach (string filePath in result) {
 				Bitmap map = new Bitmap(filePath);
 
@@ -368,21 +372,31 @@ namespace S4GFX
 				image.Width = map.Width;
 				image.Height = map.Height;
 
-				data.data = new Byte[map.Height * map.Width * 4];
+				BitmapData d = map.LockBits(new Rectangle(0, 0, map.Width, map.Height), System.Drawing.Imaging.ImageLockMode.ReadOnly, System.Drawing.Imaging.PixelFormat.Format32bppArgb);
+
+				int size = map.Height * map.Width * 4;
+
+				data.data = new Byte[size];
+
+				byte[] argb = new byte[size];
+				Marshal.Copy(d.Scan0, argb, 0, size);
+
+				map.UnlockBits(d);
 
 				int index = 0;
 				for (int y = 0; y < map.Height; y++) {
 					for (int x = 0; x < map.Width; x++) {
-						Color c = map.GetPixel(x, y);
 
-						data.data[index + 0] = c.R;
-						data.data[index + 1] = c.G;
-						data.data[index + 2] = c.B;
-						data.data[index + 3] = 255;
+						data.data[index + 0] = argb[index + 1];//r
+						data.data[index + 1] = argb[index + 2];//g
+						data.data[index + 2] = argb[index + 3];//b
+						data.data[index + 3] = argb[index + 0];//a
 
 						index += 4;
 					}
 				}
+
+				Console.WriteLine($"{ind++}/{result.Count}");
 
 				imgs.Add(data);
 			}

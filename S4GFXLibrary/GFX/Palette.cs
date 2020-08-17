@@ -17,6 +17,10 @@ namespace S4GFXLibrary.GFX
             palette = (uint[])copy.palette.Clone();
         }
 
+		public void AddEntry() {
+			Array.Resize(ref palette, palette.Length + 256);
+		}
+
         public void SetRGB(int index, int r, int g, int b)
         {
             palette[index] = (uint)(r | g << 8 | b << 16 | 255 << 24);

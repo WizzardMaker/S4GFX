@@ -16,7 +16,7 @@
 			</DockPanel.Background>
 			<uc:HeaderButton x:Name="ExportB" Heading="Export" ImageSource="/Resources/Icons/icons8-exportieren-100.png"/>
 
-			<uc:HeaderButton x:Name="ImportB" Heading="Import" ImageSource="/Resources/Icons/icons8-importieren-100.png" IsEnabled="False"/>
+			<uc:HeaderButton x:Name="ImportB" Heading="Import" ImageSource="/Resources/Icons/icons8-importieren-100.png"/>
 
 			<uc:HeaderButton x:Name="SettingsB" Heading="Settings" ImageSource="/Resources/Icons/icons8-einstellungen-100.png"/>
 
@@ -86,7 +86,7 @@
 								<Button x:Name="OpenPath1" Content="Open" HorizontalAlignment="Left" Margin="387,2,0,0" VerticalAlignment="Top" Width="75" Click="OpenPath_Click"/>
 							</Grid>
 						</Border>
-						<CheckBox Content="Include subfolders" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="10,99,0,0"/>
+						<CheckBox x:Name="ImportSubfolders" Content="Include subfolders" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="10,99,0,0"/>
 						<Button Content="Prepare" HorizontalAlignment="Left" VerticalAlignment="Top" Width="75" Margin="191,19,0,0"/>
 						<ComboBox x:Name="ExportGroupIDs_Copy" HorizontalAlignment="Left" VerticalAlignment="Top" Width="96" Margin="76,19,0,0" SelectionChanged="ExportGroupIDs_SelectionChanged" IsEnabled="{Binding IsNotLoading}"/>
 						<Label HorizontalAlignment="Left" Margin="10,15,0,0" VerticalAlignment="Top" Width="66">

@@ -46,14 +46,27 @@ namespace S4GFXLibrary.FileReader
 			Palette p = paletteCollection.GetPalette();
 
 			int palettePosition = 0;
-			int oldIndex = (GetImage(index) as GfxImage).jobIndex;
+			int addedLength = 0;
+			int oldIndex = (GetImage(index) as GfxImage)?.jobIndex ?? 0;
 			for (int j = 0; j < newDatas.Length; j++) {
-				if(index + j > images.Length) {
+				if(index + j >= images.Length) {
 					Array.Resize(ref images, index + j + 1);
+
+					paletteCollection.GetPilFile().Resize(images.Length);
+					p.AddEntry();
+
+					paletteCollection.GetPilFile().SetOffset(index+j, (paletteCollection.GetPilFile().GetOffset(index + j - 1)+256*2));
+
 					images[index + j] = new GfxImage(
 						null,
 						p,
-						paletteCollection.GetOffset((GetImage(index + j - 1) as GfxImage).jobIndex));
+						paletteCollection.GetOffset(index + j));
+
+					images[index + j].jobIndex = index + j;
+
+					offsetTable.AddOffset();
+
+					offsetTable.offsetTable[index+j] = (int)baseStream.Length + addedLength;
 				}
 
 				GfxImage i = images[index + j];
@@ -71,6 +84,7 @@ namespace S4GFXLibrary.FileReader
 				palettePosition += RecreatePaletteAt(start, palettePosition, newDatas[j]);
 
 				i.buffer = i.CreateImageData(newDatas[j]);
+				addedLength += i.buffer.Length;
 
 				int nextImageStartOffset = offsetTable.GetImageOffset(index + j + 1); //Get the current offset of the next image
 				int offset = Math.Max(0, offsetTable.GetImageOffset(index + j) + i.HeaderSize + i.buffer.Length - nextImageStartOffset - 1); //Our data could be larger, calculate how much larger
@@ -98,8 +112,8 @@ namespace S4GFXLibrary.FileReader
 
 			return new DataBufferCollection(fileId)
 				.AddBuffer(gfxDataBuffer, "gfx")
-				.AddBuffer(pilDataBuffer, "pi4", "pi2")
-				.AddBuffer(paletteDataBuffer, "p46", "p26")
+				.AddBuffer(pilDataBuffer, "pil")//"pi4", "pi2")
+				.AddBuffer(paletteDataBuffer, "pa5","pa6")//"p46", "p26")
 				.AddBuffer(offsetTable.GetData(), "gil");
 		}
 
@@ -232,8 +246,10 @@ namespace S4GFXLibrary.FileReader
 
 			if (additionOffset == 0) {
 				for (int i = 0; i < 256; i++) {
-					p.SetColor(paletteOffset + i, 9999);
+					p.SetColor(paletteOffset + i, Palette.RGBToPalette(0,255,255));
 				}
+				//p.SetColor(paletteOffset + 0, Palette.RGBToPalette(255, 0, 0));
+				//p.SetColor(paletteOffset + 1, Palette.RGBToPalette(0, 255, 0));
 				additionOffset = 1;
 			}
 

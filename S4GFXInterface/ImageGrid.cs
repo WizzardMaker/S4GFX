@@ -30,9 +30,9 @@ namespace S4GFXInterface
 			DirectBitmap bitmap;
 			private ExportedBitmap gridElement;
 
-			private bool removeAlpha = true;
+			private bool removeAlpha;
 			private bool onlyShadows;
-			private bool removeShadows = true;
+			private bool removeShadows;
 
 			ImageData data;
 

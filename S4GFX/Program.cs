@@ -369,10 +369,10 @@ namespace S4GFX
 
 				ImageData data = new ImageData(map.Height, map.Width);
 
-				image.Width = map.Width;
-				image.Height = map.Height;
+				//image.Width = map.Width;
+				//image.Height = map.Height;
 
-				BitmapData d = map.LockBits(new Rectangle(0, 0, map.Width, map.Height), System.Drawing.Imaging.ImageLockMode.ReadOnly, System.Drawing.Imaging.PixelFormat.Format32bppArgb);
+				BitmapData d = map.LockBits(new Rectangle(0, 0, map.Width, map.Height), System.Drawing.Imaging.ImageLockMode.ReadOnly, System.Drawing.Imaging.PixelFormat.Format32bppPArgb);
 
 				int size = map.Height * map.Width * 4;
 
@@ -386,11 +386,11 @@ namespace S4GFX
 				int index = 0;
 				for (int y = 0; y < map.Height; y++) {
 					for (int x = 0; x < map.Width; x++) {
-
-						data.data[index + 0] = argb[index + 1];//r
-						data.data[index + 1] = argb[index + 2];//g
-						data.data[index + 2] = argb[index + 3];//b
-						data.data[index + 3] = argb[index + 0];//a
+						//so LockBits stores the data as bgra, because fuck you, thats why...
+						data.data[index + 0] = argb[index + 2];//g1
+						data.data[index + 1] = argb[index + 1];//r2
+						data.data[index + 2] = argb[index + 0];//a3
+						data.data[index + 3] = argb[index + 3];//b0
 
 						index += 4;
 					}

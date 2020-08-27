@@ -167,7 +167,11 @@ namespace S4GFXInterface
 			exportImageGrid.ViewModeChanged += CacheExportScrollPosition;
 			exportImageGrid.SelectionChanged += ExportSelectionChanged;
 
-			ExportGroupIDs.SelectedIndex = 0;
+			CanExport = false;
+			IsNotLoading = true;
+			ReturnToGroupBut.Visibility = Visibility.Collapsed;
+
+			//ExportGroupIDs.SelectedIndex = 0;
 			//ExportGrid.Children.Add(new ExportedBitmap());
 		}
 
@@ -209,7 +213,7 @@ namespace S4GFXInterface
 		void GetAllGroups() {
 			List<string> ids = new List<string>();
 
-			foreach (string f in Directory.GetFiles(App.GamePath + "/GFX/", "*.gfx")) {
+			foreach (string f in Directory.GetFiles(App.GamePath + "/GFX/").Where(f => f.EndsWith(".gfx") || f.EndsWith(".gh5"))) {
 				ids.Add(System.IO.Path.GetFileNameWithoutExtension(f));
 			}
 

@@ -38,25 +38,40 @@ namespace S4GFXLibrary.GFX
 		public void GetImageData16Bit(byte[] buffer, byte[] imgData, int pos, int length) {
 			int j = 0;
 
-			while(j < length) {
+			while (j < length) {
 				int value1 = buffer[pos];
 				pos++;
 
 				int value2 = buffer[pos];
 				pos++;
 
-				imgData[j++] =(byte)( value2 & 0xF8); // r
-				imgData[j++] = (byte)((value1 >> 3) | (value2 << 5) & 0xFC); // g
-				imgData[j++] = (byte)((value1 << 3) & 0xF8); // b
-				imgData[j++] = (byte)(255); // alpha
+				int RGB565 = value2 << 8 | value1;
 
+				int byte_r = (RGB565 & 0xF800) >> 11;
+				int byte_g = (RGB565 & 0x07E0) >> 5;
+				int byte_b = RGB565 & 0x1F;
+
+
+				byte_r = (byte_r * 527 + 23) >> 5;
+				byte_g = (byte_g * 259 + 33) >> 5;
+				byte_b = (byte_b * 527 + 23) >> 6;
+
+
+				int r = ((value2 & 0xF8)); // r
+				int g = (((value1 >> 3) | (value2 << 5) & 0xFC)); // g
+				int b = (((value1 << 3) & 0xF8)); // b
+
+				imgData[j++] = (byte)(byte_r); // r
+				imgData[j++] = (byte)(byte_g); // g
+				imgData[j++] = (byte)(byte_b); // b
+				imgData[j++] = (byte)((255)); // alpha
 			}
 		}
 
 		public ImageData GetImageData() {
 			ImageData img = new ImageData(Height, Width);
 
-			int length = Width * Height * 2;
+			int length = Width * Height * 4;
 			int pos = DataOffset;
 
 			byte[] imgData = new byte[length];

@@ -18,11 +18,15 @@ namespace S4GFXLibrary.GFX
 		public int GroupIndex { get; set; }
 
 		public int rowCount;
+
+		bool convertTo24Bit;
+
 		public byte[] buffer;
 
-		public GfxImage16Bit(byte[] buffer, int width, int rowCount) {
+		public GfxImage16Bit(byte[] buffer, int width, int rowCount, bool convertTo24Bit = true) {
 			this.buffer = buffer;
 			this.rowCount = rowCount;
+			this.convertTo24Bit = convertTo24Bit;
 			Width = width;
 			Height = rowCount * width;
 		}
@@ -51,15 +55,26 @@ namespace S4GFXLibrary.GFX
 				int byte_g = (RGB565 & 0x07E0) >> 5;
 				int byte_b = RGB565 & 0x1F;
 
+				int ogR = byte_r;
+				int ogG = byte_g;
+				int ogB = byte_b;
 
-				byte_r = (byte_r * 527 + 23) >> 5;
-				byte_g = (byte_g * 259 + 33) >> 5;
-				byte_b = (byte_b * 527 + 23) >> 6;
+				if (convertTo24Bit) {
+					byte_r = (byte_r * 527 + 31) >> 5;
+					byte_g = (byte_g * 259 + 33) >> 5;
+					byte_b = (byte_b * 527 + 31) >> 6;
+				} else {
+					byte_r = (int)Math.Round(byte_r / 31f * 255f);
+					byte_g = (int)Math.Round(byte_g / 63f * 255f);
+					byte_b = (int)Math.Round(byte_b / 31f * 255f);
+				}
 
+				int r = (int)Math.Round((byte_r << 5) / 527d); // r
+				int g = (int)Math.Round((byte_g << 5) / 259d); // g
+				int b = (int)Math.Round((byte_b << 6) / 527d); // b
 
-				int r = ((value2 & 0xF8)); // r
-				int g = (((value1 >> 3) | (value2 << 5) & 0xFC)); // g
-				int b = (((value1 << 3) & 0xF8)); // b
+				//if (r - ogR + g - ogG + b - ogB != 0)
+				//	Console.WriteLine("Difference!");
 
 				imgData[j++] = (byte)(byte_r); // r
 				imgData[j++] = (byte)(byte_g); // g

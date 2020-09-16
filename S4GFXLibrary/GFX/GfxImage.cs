@@ -90,12 +90,7 @@ namespace S4GFXLibrary.GFX
                 }
                 else
                 {
-                    color = palette.GetColor(paletteOffset + value);
-					//if (value > 200) {
-					//	color = Palette.RGBToPalette(0, 0, value, value);
-					//} else {
-					//	color = Palette.RGBToPalette(255, 0, 0);
-					//}
+                    color = palette.GetColor(paletteOffset + value, value);
 				}
 
                 for (int i = 0; i < count && j < length; i++)
@@ -118,7 +113,7 @@ namespace S4GFXLibrary.GFX
                 int value = pos >= buffer.Length ? 1 : buffer[pos];
                 pos++;
 
-                imgData[j++] = palette.GetColor(paletteOffset + value);
+                imgData[j++] = palette.GetColor(paletteOffset + value, value);
                 if (!paletteEntries.Contains(paletteOffset + value))
                     paletteEntries.Add(paletteOffset + value);
             }

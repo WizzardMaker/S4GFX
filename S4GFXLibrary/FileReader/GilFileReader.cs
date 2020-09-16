@@ -1,10 +1,11 @@
-﻿using System.IO;
+﻿using System;
+using System.IO;
 
 namespace S4GFXLibrary.FileReader
 {
     public class GilFileReader : FileReaderBase
     {
-        int[] offsetTable;
+        public int[] offsetTable;
 
 
         public int GetImageCount()
@@ -21,6 +22,10 @@ namespace S4GFXLibrary.FileReader
 
             return offsetTable[index];
         }
+
+		public void AddOffset() {
+			Array.Resize(ref offsetTable, offsetTable.Length+1);
+		}
 
         /// <summary>
         /// Moves all offsets by offsetToAdd, starting from index startIndex
@@ -51,7 +56,7 @@ namespace S4GFXLibrary.FileReader
 
         override public byte[] GetData()
         {
-            byte[] data = new byte[(int)baseStream.Length];
+            byte[] data = new byte[HeaderSize+offsetTable.Length*4];
 
             using (BinaryWriter writer = new BinaryWriter(new MemoryStream(data)))
             {

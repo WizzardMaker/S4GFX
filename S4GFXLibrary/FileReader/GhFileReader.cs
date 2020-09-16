@@ -37,7 +37,7 @@ namespace S4GFXLibrary.FileReader {
 			throw new System.NotImplementedException();
 		}
 
-		public GhFileReader(BinaryReader reader) {
+		public GhFileReader(BinaryReader reader, bool isGh5 = true) {
 			ReadResource(reader);
 
 			reader.BaseStream.Seek(0, SeekOrigin.Begin);
@@ -62,10 +62,10 @@ namespace S4GFXLibrary.FileReader {
 
 				switch (imageType) {
 					case 0:
-					img = new GfxImage16Bit(buffer, 128, rowCount);
+					img = new GfxImage16Bit(buffer, 128, rowCount, isGh5);
 					break;
 					case 1:
-					img = new GfxImage16Bit(buffer, 256, rowCount);
+					img = new GfxImage16Bit(buffer, 256, rowCount, isGh5);
 					break;
 					case 2:
 					img = new GfxImageWithPalette(buffer, 128, rowCount);
@@ -76,7 +76,7 @@ namespace S4GFXLibrary.FileReader {
 				}
 
 				img.Flag1 = flag1;
-				img.Flag1 = flag2;
+				img.Flag2 = flag2;
 				img.DataOffset = filePos + 8;
 
 				img.Index = index;

@@ -16,7 +16,7 @@
 			</DockPanel.Background>
 			<uc:HeaderButton x:Name="ExportB" Heading="Export" ImageSource="/Resources/Icons/icons8-exportieren-100.png"/>
 
-			<uc:HeaderButton x:Name="ImportB" Heading="Import" ImageSource="/Resources/Icons/icons8-importieren-100.png" IsEnabled="False"/>
+			<uc:HeaderButton x:Name="ImportB" Heading="Import" ImageSource="/Resources/Icons/icons8-importieren-100.png"/>
 
 			<uc:HeaderButton x:Name="SettingsB" Heading="Settings" ImageSource="/Resources/Icons/icons8-einstellungen-100.png"/>
 
@@ -26,26 +26,52 @@
 			<TabItem x:Name="Export" Header="Export" Margin="-2,-2,-2,0">
 				<DockPanel Margin="0,0,10,0" LastChildFill="False" ScrollViewer.VerticalScrollBarVisibility="Disabled">
 					<Grid Width="328" Margin="0,0,0,23">
-						<Button x:Name="ReturnToGroupBut" HorizontalAlignment="Left" VerticalAlignment="Top" Width="117" Margin="201,10,0,0" Height="22" Click="ReturnToGroupBut_Click">
+						<Grid.RowDefinitions>
+							<RowDefinition Height="121*"/>
+							<RowDefinition Height="327*"/>
+						</Grid.RowDefinitions>
+						<Button x:Name="ReturnToGroupBut" HorizontalAlignment="Left" VerticalAlignment="Top" Width="113" Margin="205,10,0,0" Height="22" Click="ReturnToGroupBut_Click">
 							<StackPanel Height="18" Width="133" Orientation="Horizontal">
-								<Image Source="Resources/Icons/icons8-zurück-96.png" Width="23" Margin="0"/>
+								<Image Source="Resources/Icons/icons8-zurück-96.png" Width="18" Margin="0"/>
 								<TextBlock TextWrapping="Wrap" Text="Return to group" Margin="0" Width="101"/>
 							</StackPanel>
 						</Button>
-						<ComboBox x:Name="ExportGroupIDs" HorizontalAlignment="Left" VerticalAlignment="Top" Width="96" Margin="76,10,0,0" SelectionChanged="ExportGroupIDs_SelectionChanged" IsEnabled="{Binding IsNotLoading}"/>
+						<ComboBox x:Name="ExportGroupIDs" HorizontalAlignment="Left" VerticalAlignment="Top" Width="52" Margin="76,10,0,0" SelectionChanged="ExportGroupIDs_SelectionChanged" IsEnabled="{Binding IsNotLoading}"/>
 						<Label HorizontalAlignment="Left" Margin="10,6,0,0" VerticalAlignment="Top" Width="66">
 							<TextBlock HorizontalAlignment="Left" TextWrapping="Wrap" Text="Group ID:" VerticalAlignment="Top"/>
 						</Label>
-						<Button x:Name="ExportSaveToDiskSingle" Height="22" Content="Save selected to Disk" Margin="174,416,10,10" Click="ExportSaveToDiskSingle_Click" IsEnabled="{Binding CanExportSingle}"/>
-						<Button x:Name="ExportSaveToDiskGroup" Height="22" Content="Save group to Disk" Margin="10,416,174,10" Click="ExportSaveToDiskGroup_Click"  IsEnabled="{Binding CanExportGroup}"/>
-						<Button x:Name="ExportSaveToDiskAll" Height="22" Content="Save All to Disk" Margin="92,389,92,37" Click="ExportSaveToDiskAll_Click"  IsEnabled="{Binding CanExportAll}"/>
+						<Button x:Name="ExportSaveToDiskSingle" Height="22" Content="Save selected to Disk" Margin="174,294.667,10,10" Click="ExportSaveToDiskSingle_Click" IsEnabled="{Binding CanExportSingle}" Grid.Row="1"/>
+						<Button x:Name="ExportSaveToDiskGroup" Height="22" Content="Save group to Disk" Margin="10,294.667,174,10" Click="ExportSaveToDiskGroup_Click"  IsEnabled="{Binding CanExportGroup}" Grid.Row="1"/>
+						<Button x:Name="ExportSaveToDiskAll" Height="22" Content="Save All to Disk" Margin="92,267.667,92,37" Click="ExportSaveToDiskAll_Click"  IsEnabled="{Binding CanExportAll}" Grid.Row="1"/>
+						<Button x:Name="ReloadBut" Content="Reload" HorizontalAlignment="Left" VerticalAlignment="Top" Width="58" Margin="137,10,0,0" Height="22" Click="ReloadBut_Click" IsEnabled="{Binding IsNotLoading}"/>
+						<Label HorizontalAlignment="Left" Margin="5,61,0,0" VerticalAlignment="Top" Width="313">
+							<TextBlock HorizontalAlignment="Left" TextWrapping="Wrap" VerticalAlignment="Top" Width="303"><Run Text="GFX Settings:"/><Run Text="    "/><Run Text="            "/><Run Text="*changing these requires a reload"/></TextBlock>
+						</Label>
+						<ComboBox x:Name="TeamGFXSetting" HorizontalAlignment="Left" VerticalAlignment="Top" Width="84" Margin="78,26,0,0" IsEnabled="{Binding IsNotLoading}" SelectedIndex="0" Grid.Row="1">
+							<ComboBoxItem Content="Red (0)"/>
+							<ComboBoxItem Content="Blue (1)"/>
+							<ComboBoxItem Content="Green (2)"/>
+							<ComboBoxItem Content="Yellow (3)"/>
+							<ComboBoxItem Content="Purple (4)"/>
+							<ComboBoxItem Content="Orange (5)"/>
+							<ComboBoxItem Content="Cyan (6)"/>
+							<ComboBoxItem Content="White (7)"/>
+						</ComboBox>
+						<Label HorizontalAlignment="Left" Margin="7,22,0,0" VerticalAlignment="Top" Width="71" Grid.Row="1">
+							<TextBlock HorizontalAlignment="Left" TextWrapping="Wrap" Text="Team color:" VerticalAlignment="Top"/>
+						</Label>
+						<TextBlock HorizontalAlignment="Left" Height="23" TextWrapping="Wrap" VerticalAlignment="Top" Width="120" Margin="179,27,0,0" Grid.Row="1"><Run Text="*for 20,21,22,"/><Run Text="23"/><Run Text=".gfx"/></TextBlock>
+						<Label HorizontalAlignment="Left" Margin="5,180.667,0,0" VerticalAlignment="Top" Width="93" Grid.Row="1"/>
+						<CheckBox x:Name="TransparencyCheck" Content="Use red as transparency" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="10,87,0,0" Unchecked="TransparencyCheck_Checked" Checked="TransparencyCheck_Checked"/>
+						<CheckBox x:Name="ShadowCheck" Content="Use green as shadow" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="10,107,0,0" Grid.RowSpan="2" Unchecked="ShadowCheck_Checked" Checked="ShadowCheck_Checked"/>
+						<CheckBox x:Name="RemoveGarbageCheck" Content="Remove last line (garbage info)" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="10,6,0,0" Unchecked="RemoveGarbageCheck_Checked" Checked="RemoveGarbageCheck_Checked" Grid.Row="1"/>
 					</Grid>
 					<StatusBar HorizontalContentAlignment="Center" VerticalContentAlignment="Center" DockPanel.Dock="Bottom" BorderThickness="0 1 0 0" BorderBrush="{DynamicResource {x:Static SystemColors.ControlDarkBrushKey}}" Margin="-328,0,0,0">
 						<StatusBarItem>
-							<TextBlock x:Name="ExportLoadCount" Text="Hello!"/>
+							<TextBlock x:Name="ExportLoadCount" Text="Hello!" Visibility="Hidden"/>
 						</StatusBarItem>
 						<StatusBarItem>
-							<Image x:Name="LoadingIcon" Source="Resources/Icons/icons8-ladeanimation-bild-1-50.png" Height="22" Width="22">
+							<Image x:Name="LoadingIcon" Source="Resources/Icons/icons8-ladeanimation-bild-1-50.png" Height="22" Width="22" Visibility="Hidden">
 								<Image.Triggers>
 									<EventTrigger RoutedEvent="Window.Loaded">
 										<BeginStoryboard>
@@ -86,7 +112,7 @@
 								<Button x:Name="OpenPath1" Content="Open" HorizontalAlignment="Left" Margin="387,2,0,0" VerticalAlignment="Top" Width="75" Click="OpenPath_Click"/>
 							</Grid>
 						</Border>
-						<CheckBox Content="Include subfolders" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="10,99,0,0"/>
+						<CheckBox x:Name="ImportSubfolders" Content="Include subfolders" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="10,99,0,0"/>
 						<Button Content="Prepare" HorizontalAlignment="Left" VerticalAlignment="Top" Width="75" Margin="191,19,0,0"/>
 						<ComboBox x:Name="ExportGroupIDs_Copy" HorizontalAlignment="Left" VerticalAlignment="Top" Width="96" Margin="76,19,0,0" SelectionChanged="ExportGroupIDs_SelectionChanged" IsEnabled="{Binding IsNotLoading}"/>
 						<Label HorizontalAlignment="Left" Margin="10,15,0,0" VerticalAlignment="Top" Width="66">

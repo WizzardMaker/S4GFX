@@ -30,9 +30,8 @@ namespace S4GFXInterface
 			DirectBitmap bitmap;
 			private ExportedBitmap gridElement;
 
-			private bool removeAlpha = true;
 			private bool onlyShadows;
-			private bool removeShadows = true;
+			public static bool removeAlpha, removeShadows, removeGarbage;
 
 			ImageData data;
 
@@ -73,6 +72,13 @@ namespace S4GFXInterface
 						byte red = data.data[index + 0];
 						byte green = data.data[index + 1];
 						byte blue = data.data[index + 2];
+
+
+						if (removeGarbage && y > height-2) {
+							red = 255;
+							green = 0;
+							blue = 0;
+						}
 
 						if (red == 255 && green + blue == 0) {
 							alpha = removeAlpha ? 0 : alpha;

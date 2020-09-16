@@ -28,7 +28,11 @@ namespace S4GFXLibrary.GFX
             {
                 uint color = Palette.RGBToPalette(data[c], data[c + 1], data[c + 2]);
 
-                if (!usedColors.Contains(color))
+				int r = (int)(color & 0b0000_0000_0000_0000_1111_1111);
+				int g = (int)(color >> 8 & 0b0000_0000_0000_0000_1111_1111);
+				int b = (int)(color >> 16 & 0b0000_0000_0000_0000_1111_1111);
+
+				if (!usedColors.Contains(color))
                 {
                     usedColors.Add(color);
                     usedColors.Sort();

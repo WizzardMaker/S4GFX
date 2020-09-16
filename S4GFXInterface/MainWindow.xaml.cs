@@ -167,7 +167,17 @@ namespace S4GFXInterface
 			exportImageGrid.ViewModeChanged += CacheExportScrollPosition;
 			exportImageGrid.SelectionChanged += ExportSelectionChanged;
 
-			ExportGroupIDs.SelectedIndex = 0;
+			CanExport = false;
+			IsNotLoading = true;
+			ReturnToGroupBut.Visibility = Visibility.Collapsed;
+
+			LoadingIcon.Visibility = Visibility.Hidden;
+
+
+			ImageGrid.ImageView.removeAlpha = TransparencyCheck.IsChecked == false;
+			ImageGrid.ImageView.removeShadows = ShadowCheck.IsChecked == false;
+
+			//ExportGroupIDs.SelectedIndex = 0;
 			//ExportGrid.Children.Add(new ExportedBitmap());
 		}
 
@@ -209,7 +219,7 @@ namespace S4GFXInterface
 		void GetAllGroups() {
 			List<string> ids = new List<string>();
 
-			foreach (string f in Directory.GetFiles(App.GamePath + "/GFX/", "*.gfx")) {
+			foreach (string f in Directory.GetFiles(App.GamePath + "/GFX/").Where(f => f.EndsWith(".gfx") || f.EndsWith(".gh5"))) {
 				ids.Add(System.IO.Path.GetFileNameWithoutExtension(f));
 			}
 
@@ -278,7 +288,7 @@ namespace S4GFXInterface
 			var gh = new BinaryReader(File.Open(fileId + ".gh5", FileMode.Open), Encoding.Default, true);
 			//var gl = new BinaryReader(File.Open(fileId + ".gl5", FileMode.Open), Encoding.Default, true);
 
-			gfxFile = new GhFileReader(gh);
+			gfxFile = new GhFileReader(gh, true);
 
 			gh.Close();
 			//gl.Close();
@@ -298,8 +308,8 @@ namespace S4GFXInterface
 				paletteIndex = new BinaryReader(File.Open(fileId + ".pil", FileMode.Open), Encoding.Default, true);
 				palette = new BinaryReader(File.Open(fileId + ".pa6", FileMode.Open), Encoding.Default, true);
 			} else {
-				paletteIndex = new BinaryReader(File.Open(fileId + ".pi4", FileMode.Open), Encoding.Default, true);
-				palette = new BinaryReader(File.Open(fileId + ".p46", FileMode.Open), Encoding.Default, true);
+				paletteIndex = new BinaryReader(File.Open(fileId + ".pi2", FileMode.Open), Encoding.Default, true);
+				palette = new BinaryReader(File.Open(fileId + ".p26", FileMode.Open), Encoding.Default, true);
 			}
 
 			if (useJil) {
@@ -312,6 +322,16 @@ namespace S4GFXInterface
 			var gfxIndexList = new GilFileReader(gil);
 			var paletteIndexList = new PilFileReader(paletteIndex);
 			var paletteCollection = new PaletteCollection(palette, paletteIndexList);
+
+			switch (fileId.Substring(fileId.Length-2)) {
+				case ("20"):
+				case ("21"):
+				case ("22"):
+				case ("23"):
+					paletteCollection.GetPalette().replaceTeamColors = true;
+					paletteCollection.GetPalette().team = TeamGFXSetting.SelectedIndex;
+				break;
+			}
 
 			DilFileReader directionIndexList = null;
 			JilFileReader jobIndexList = null;
@@ -372,6 +392,7 @@ namespace S4GFXInterface
 						Dispatcher.Invoke((Action)delegate {
 							try {
 								ExportLoadCount.Text = $"Loaded: {loaded++}/{count}";
+								ExportLoadCount.Visibility = Visibility.Visible;
 								LoadingIcon.Visibility = Visibility.Visible;
 							} catch (Exception e) {
 								Console.WriteLine(e.Message);
@@ -428,9 +449,15 @@ namespace S4GFXInterface
 		}
 
 		private void ExportGroupIDs_SelectionChanged(object sender, SelectionChangedEventArgs e) {
+			LoadGroup();
+		}
+
+		private void LoadGroup() {
+			if (ExportScrollView == null)
+				return;
 			ExportScrollView.ScrollToTop();
 
-			exportImageGrid.Clear();
+			exportImageGrid?.Clear();
 			source.Cancel();
 
 			exportImageGrid.SetContainer(int.Parse((string)ExportGroupIDs.SelectedItem));
@@ -492,6 +519,22 @@ namespace S4GFXInterface
 
 		private void ExportSaveToDiskSingle_Click(object sender, RoutedEventArgs e) {
 			exportImageGrid.selectedItem.SaveBitmapToFile(GetFullPath(exportImageGrid.selectedItem.Group));
+		}
+
+		private void ReloadBut_Click(object sender, RoutedEventArgs e) {
+			LoadGroup();
+		}
+
+		private void TransparencyCheck_Checked(object sender, RoutedEventArgs e) {
+			ImageGrid.ImageView.removeAlpha = TransparencyCheck.IsChecked == false;
+		}
+
+		private void ShadowCheck_Checked(object sender, RoutedEventArgs e) {
+			ImageGrid.ImageView.removeShadows = ShadowCheck.IsChecked == false;
+		}
+
+		private void RemoveGarbageCheck_Checked(object sender, RoutedEventArgs e) {
+			ImageGrid.ImageView.removeGarbage = ShadowCheck.IsChecked == false;
 		}
 
 		private void ExportSaveToDiskGroup_Click(object sender, RoutedEventArgs e) {

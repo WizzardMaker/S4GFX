@@ -16,7 +16,7 @@
 			</DockPanel.Background>
 			<uc:HeaderButton x:Name="ExportB" Heading="Export" ImageSource="/Resources/Icons/icons8-exportieren-100.png"/>
 
-			<uc:HeaderButton x:Name="ImportB" Heading="Import" ImageSource="/Resources/Icons/icons8-importieren-100.png"/>
+			<uc:HeaderButton x:Name="ImportB" Heading="Import" ImageSource="/Resources/Icons/icons8-importieren-100.png" Visibility="Collapsed"/>
 
 			<uc:HeaderButton x:Name="SettingsB" Heading="Settings" ImageSource="/Resources/Icons/icons8-einstellungen-100.png"/>
 

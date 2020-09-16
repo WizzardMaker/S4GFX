@@ -327,7 +327,7 @@ namespace S4GFXInterface
 				case ("20"):
 				case ("21"):
 				case ("22"):
-				case ("23"):
+				case ("24"):
 					paletteCollection.GetPalette().replaceTeamColors = true;
 					paletteCollection.GetPalette().team = TeamGFXSetting.SelectedIndex;
 				break;
